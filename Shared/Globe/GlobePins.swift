@@ -3,6 +3,11 @@ import WorldTimeKit
 
 struct GlobePins: View {
     private static let visibleDepth = 0.2
+    private static let dotSize: CGFloat = 6
+    private static let labelGap: Double = 4
+    private static let labelCharacterWidth: Double = 6.4
+    private static let labelPadding: Double = 8
+    private static let labelHeight: Double = 15
 
     let places: [Place]
     let here: Place?
@@ -12,52 +17,60 @@ struct GlobePins: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let radius = GlobeRenderer.radius(for: geometry.size, zoom: zoom)
-            let centre = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
+            let pins = visiblePins(in: geometry.size)
+            let labels = pins.map { label(for: $0.place) }
+            let sides = LabelPlacement.sides(
+                for: pins.map(\.point),
+                labels: labels.map(\.size),
+                dotRadius: Self.dotSize / 2,
+                gap: Self.labelGap
+            )
 
-            ForEach(places) { place in
-                let point = orientation.viewPoint(of: place.coordinate)
-                if point.z > Self.visibleDepth {
-                    GlobePin(place: place, date: date, colour: .yellow)
-                        .position(x: centre.x + point.x * radius, y: centre.y - point.y * radius)
-                }
-            }
-            if let here {
-                let point = orientation.viewPoint(of: here.coordinate)
-                if point.z > Self.visibleDepth {
-                    GlobePin(place: here, date: date, colour: .blue)
-                        .position(x: centre.x + point.x * radius, y: centre.y - point.y * radius)
+            ForEach(pins.indices, id: \.self) { index in
+                let pin = pins[index]
+                Circle()
+                    .fill(pin.colour)
+                    .frame(width: Self.dotSize, height: Self.dotSize)
+                    .shadow(color: pin.colour, radius: 3)
+                    .position(x: pin.point.x, y: pin.point.y)
+                if let side = sides[index] {
+                    let centre = LabelPlacement.centre(of: labels[index].size, beside: pin.point, on: side, dotRadius: Self.dotSize / 2, gap: Self.labelGap)
+                    PinLabel(text: labels[index].text)
+                        .position(x: centre.x, y: centre.y)
                 }
             }
         }
         .allowsHitTesting(false)
     }
-}
 
-private struct GlobePin: View {
-    let place: Place
-    let date: Date
-    let colour: Color
-
-    var body: some View {
-        Circle()
-            .fill(colour)
-            .frame(width: 6, height: 6)
-            .shadow(color: colour, radius: 3)
-            .overlay(alignment: .leading) {
-                Text(date.formatted(style))
-                    .font(.caption2)
-                    .monospacedDigit()
-                    .padding(.horizontal, 4)
-                    .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 4))
-                    .fixedSize()
-                    .offset(x: 10)
-            }
+    private func visiblePins(in size: CGSize) -> [(place: Place, point: LabelPlacement.Point, colour: Color)] {
+        let radius = GlobeRenderer.radius(for: size, zoom: zoom)
+        let centre = CGPoint(x: size.width / 2, y: size.height / 2)
+        let marked = (here.map { [($0, Color.blue)] } ?? []) + places.map { ($0, Color.yellow) }
+        return marked.compactMap { place, colour in
+            let point = orientation.viewPoint(of: place.coordinate)
+            guard point.z > Self.visibleDepth else { return nil }
+            return (place, LabelPlacement.Point(x: centre.x + point.x * radius, y: centre.y - point.y * radius), colour)
+        }
     }
 
-    private var style: Date.FormatStyle {
+    private func label(for place: Place) -> (text: String, size: LabelPlacement.Size) {
         var style = Date.FormatStyle.dateTime.hour().minute()
         style.timeZone = place.timeZone
-        return style
+        let text = date.formatted(style)
+        return (text, LabelPlacement.Size(width: Double(text.count) * Self.labelCharacterWidth + Self.labelPadding, height: Self.labelHeight))
+    }
+}
+
+private struct PinLabel: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.caption2)
+            .monospacedDigit()
+            .padding(.horizontal, 4)
+            .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 4))
+            .fixedSize()
     }
 }
