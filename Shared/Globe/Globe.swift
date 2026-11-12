@@ -19,7 +19,7 @@ struct Globe: View {
                 GeometryReader { geometry in
                     ZStack {
                         GlobeImage(orientation: shown.orientation, zoom: shown.zoom, sun: Sun.overhead(at: date))
-                        GlobePins(places: places, orientation: shown.orientation, zoom: shown.zoom, date: date)
+                        GlobePins(places: places, here: hereOnGlobe, orientation: shown.orientation, zoom: shown.zoom, date: date)
                     }
                     .contentShape(Rectangle())
                     .gesture(drag(radius: GlobeRenderer.radius(for: geometry.size, zoom: shown.zoom)))
@@ -40,6 +40,10 @@ struct Globe: View {
             guard let flight else { return }
             move(to: camera.focused(on: flight.place.coordinate), seconds: GlobeMotion.flightSeconds)
         }
+    }
+
+    private var hereOnGlobe: Place? {
+        Here.shared.coordinate == nil ? nil : Here.shared.place
     }
 
     private static var homeLongitude: Double {

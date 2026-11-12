@@ -5,6 +5,7 @@ struct GlobePins: View {
     private static let visibleDepth = 0.2
 
     let places: [Place]
+    let here: Place?
     let orientation: GlobeOrientation
     let zoom: Double
     let date: Date
@@ -17,7 +18,14 @@ struct GlobePins: View {
             ForEach(places) { place in
                 let point = orientation.viewPoint(of: place.coordinate)
                 if point.z > Self.visibleDepth {
-                    GlobePin(place: place, date: date)
+                    GlobePin(place: place, date: date, colour: .yellow)
+                        .position(x: centre.x + point.x * radius, y: centre.y - point.y * radius)
+                }
+            }
+            if let here {
+                let point = orientation.viewPoint(of: here.coordinate)
+                if point.z > Self.visibleDepth {
+                    GlobePin(place: here, date: date, colour: .blue)
                         .position(x: centre.x + point.x * radius, y: centre.y - point.y * radius)
                 }
             }
@@ -29,12 +37,13 @@ struct GlobePins: View {
 private struct GlobePin: View {
     let place: Place
     let date: Date
+    let colour: Color
 
     var body: some View {
         Circle()
-            .fill(.yellow)
+            .fill(colour)
             .frame(width: 6, height: 6)
-            .shadow(color: .yellow, radius: 3)
+            .shadow(color: colour, radius: 3)
             .overlay(alignment: .leading) {
                 Text(date.formatted(style))
                     .font(.caption2)

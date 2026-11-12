@@ -19,6 +19,8 @@ struct ZoneListView: View {
             List {
                 HereRow(date: moment.date(at: context.date))
                     .frame(height: Self.rowHeight)
+                    .contentShape(Rectangle())
+                    .onTapGesture { onSelect(Here.shared.place) }
                     .listRowInsets(Self.rowInsets)
                     .listRowBackground(
                         RoundedRectangle(cornerRadius: 8)
