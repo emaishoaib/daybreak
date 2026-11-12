@@ -1,4 +1,5 @@
 import SwiftUI
+import WorldTimeKit
 
 struct ZoneListView: View {
     static let collapsedCount = 3
@@ -8,6 +9,7 @@ struct ZoneListView: View {
     let zones: ZoneList
     let moment: ChosenMoment
     let isExpanded: Bool
+    let onSelect: (Place) -> Void
 
     var body: some View {
         let places = isExpanded ? zones.places : Array(zones.places.prefix(Self.collapsedCount))
@@ -19,6 +21,8 @@ struct ZoneListView: View {
                         .frame(height: Self.rowHeight)
                         .listRowInsets(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12))
                         .listRowBackground(Color.clear)
+                        .contentShape(Rectangle())
+                        .onTapGesture { onSelect(place) }
                         .contextMenu {
                             Button("Remove", role: .destructive) {
                                 zones.remove(place)

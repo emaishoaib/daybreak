@@ -8,6 +8,7 @@ struct WorldPanel: View {
     let moment: ChosenMoment
 
     @State private var isSearching = false
+    @State private var flight: GlobeFlight?
     @State private var layout = PopUpLayout.shared
 
     var body: some View {
@@ -38,10 +39,12 @@ struct WorldPanel: View {
                     isSearching = true
                 }
                 if !zones.places.isEmpty {
-                    ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded)
+                    ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded) { place in
+                        flight = GlobeFlight(place: place)
+                    }
                         .padding(.bottom, 8)
                 }
-                Globe(places: zones.places, moment: moment)
+                Globe(places: zones.places, moment: moment, flight: flight)
                     .frame(height: Self.globeHeight)
                 Divider()
                 TimeScrubber(moment: moment)

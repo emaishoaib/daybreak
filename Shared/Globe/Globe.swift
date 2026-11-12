@@ -4,50 +4,41 @@ import WorldTimeKit
 struct Globe: View {
     let places: [Place]
     let moment: ChosenMoment
+    let flight: GlobeFlight?
 
-    @State private var orientation = GlobeOrientation(centreLongitude: Self.homeLongitude)
-    @State private var zoom = GlobeZoom.range.lowerBound
-    @State private var dragStart: GlobeOrientation?
-    @State private var pinchStart: Double?
-    @State private var zoomTransition: GlobeZoom.Transition?
+    @State private var camera = GlobeCamera(orientation: GlobeOrientation(centreLongitude: Self.homeLongitude))
+    @State private var motion: GlobeMotion?
+    @State private var dragStart: GlobeCamera?
+    @State private var pinchStart: GlobeCamera?
 
     var body: some View {
         TimelineView(.everyMinute) { context in
             let date = moment.date(at: context.date)
-            TimelineView(.animation(paused: zoomTransition == nil)) { frame in
-                let shownZoom = zoomTransition?.zoom(at: frame.date) ?? zoom
+            TimelineView(.animation(paused: motion == nil)) { frame in
+                let shown = motion?.camera(at: frame.date) ?? camera
                 GeometryReader { geometry in
                     ZStack {
-                        GlobeImage(orientation: orientation, zoom: shownZoom, sun: Sun.overhead(at: date))
-                        GlobePins(places: places, orientation: orientation, zoom: shownZoom, date: date)
+                        GlobeImage(orientation: shown.orientation, zoom: shown.zoom, sun: Sun.overhead(at: date))
+                        GlobePins(places: places, orientation: shown.orientation, zoom: shown.zoom, date: date)
                     }
                     .contentShape(Rectangle())
-                    .gesture(drag(radius: GlobeRenderer.radius(for: geometry.size, zoom: shownZoom)))
+                    .gesture(drag(radius: GlobeRenderer.radius(for: geometry.size, zoom: shown.zoom)))
                     .simultaneousGesture(pinch)
                 }
             }
             .clipped()
             .overlay(alignment: .bottomTrailing) {
                 GlobeZoomButtons {
-                    animateZoom(to: GlobeZoom.zoomedIn(from: zoom))
+                    move(to: camera.zoomed(to: GlobeZoom.zoomedIn(from: camera.zoom)), seconds: GlobeMotion.zoomSeconds)
                 } onZoomOut: {
-                    animateZoom(to: GlobeZoom.zoomedOut(from: zoom))
+                    move(to: camera.zoomed(to: GlobeZoom.zoomedOut(from: camera.zoom)), seconds: GlobeMotion.zoomSeconds)
                 }
                 .padding(8)
             }
         }
-    }
-
-    private func animateZoom(to target: Double) {
-        let now = Date.now
-        let transition = GlobeZoom.Transition(from: zoomTransition?.zoom(at: now) ?? zoom, to: target, start: now)
-        zoom = target
-        zoomTransition = transition
-        Task {
-            try? await Task.sleep(for: .seconds(GlobeZoom.Transition.durationSeconds))
-            if zoomTransition == transition {
-                zoomTransition = nil
-            }
+        .onChange(of: flight) {
+            guard let flight else { return }
+            move(to: camera.focused(on: flight.place.coordinate), seconds: GlobeMotion.flightSeconds)
         }
     }
 
@@ -55,12 +46,32 @@ struct Globe: View {
         Double(TimeZone.autoupdatingCurrent.secondsFromGMT()) / 240
     }
 
+    private func move(to target: GlobeCamera, seconds: TimeInterval) {
+        let now = Date.now
+        let next = GlobeMotion(from: motion?.camera(at: now) ?? camera, to: target, start: now, durationSeconds: seconds)
+        camera = target
+        motion = next
+        Task {
+            try? await Task.sleep(for: .seconds(seconds))
+            if motion == next {
+                motion = nil
+            }
+        }
+    }
+
+    private func stopMoving() {
+        guard let motion else { return }
+        camera = motion.camera(at: .now)
+        self.motion = nil
+    }
+
     private func drag(radius: Double) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
-                let start = dragStart ?? orientation
+                if dragStart == nil { stopMoving() }
+                let start = dragStart ?? camera
                 dragStart = start
-                orientation = start
+                camera.orientation = start.orientation
                     .turned(byDegrees: -value.translation.width / radius * 180 / .pi)
                     .tilted(byDegrees: value.translation.height / radius * 180 / .pi)
             }
@@ -72,10 +83,10 @@ struct Globe: View {
     private var pinch: some Gesture {
         MagnifyGesture()
             .onChanged { value in
-                let start = pinchStart ?? zoom
+                if pinchStart == nil { stopMoving() }
+                let start = pinchStart ?? camera
                 pinchStart = start
-                zoomTransition = nil
-                zoom = GlobeZoom.clamped(start * value.magnification)
+                camera = start.zoomed(to: start.zoom * value.magnification)
             }
             .onEnded { _ in
                 pinchStart = nil

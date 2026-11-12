@@ -20,6 +20,14 @@ public struct GlobeOrientation: Hashable, Sendable {
         GlobeOrientation(centreLongitude: centreLongitude, tilt: tilt + degrees)
     }
 
+    public func interpolated(to target: GlobeOrientation, progress: Double) -> GlobeOrientation {
+        let turn = Self.wrapped(target.centreLongitude - centreLongitude)
+        return GlobeOrientation(
+            centreLongitude: centreLongitude + turn * progress,
+            tilt: tilt + (target.tilt - tilt) * progress
+        )
+    }
+
     public func viewPoint(of coordinate: Coordinate) -> ViewPoint {
         let latitude = radians(coordinate.latitude)
         let longitude = radians(coordinate.longitude - centreLongitude)
