@@ -1,0 +1,51 @@
+name: Daybreak
+
+options:
+  bundleIdPrefix: com.mashoaib
+  deploymentTarget:
+    iOS: "27.0"
+    macOS: "27.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  Daybreak-iOS:
+    type: application
+    platform: iOS
+    sources:
+      - iOS
+    info:
+      path: iOS/Info.plist
+      properties:
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_NAME: Daybreak
+        PRODUCT_BUNDLE_IDENTIFIER: com.mashoaib.daybreak
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Daybreak
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        TARGETED_DEVICE_FAMILY: "1"
+
+  Daybreak-macOS:
+    type: application
+    platform: macOS
+    sources:
+      - macOS
+    info:
+      path: macOS/Info.plist
+    settings:
+      base:
+        PRODUCT_NAME: Daybreak
+        PRODUCT_BUNDLE_IDENTIFIER: com.mashoaib.daybreak
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Daybreak
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_LSUIElement: YES
