@@ -29,6 +29,8 @@ struct WorldPanel: View {
                         .padding(.bottom, 8)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
+                TimeScrubber(moment: moment)
+                    .padding(.top, -6)
                 ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded) { place in
                     flight = GlobeFlight(place: place)
                 }
@@ -44,8 +46,7 @@ struct WorldPanel: View {
                             isSearching = true
                         }
                     }
-                Divider()
-                TimeScrubber(moment: moment)
+                    .padding(.bottom, 8)
             }
         }
     }

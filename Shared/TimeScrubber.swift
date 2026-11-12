@@ -1,39 +1,41 @@
 import SwiftUI
+import WorldTimeKit
 
 struct TimeScrubber: View {
-    private static let lastMinuteOfDay: Double = 24 * 60 - 1
-    private static let stepMinutes: Double = 15
-
     let moment: ChosenMoment
+
+    @State private var here = Here.shared
 
     var body: some View {
         TimelineView(.everyMinute) { context in
+            let date = moment.date(at: context.date)
             VStack(spacing: 6) {
-                HStack {
-                    Text("Your time")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text(moment.date(at: context.date).formatted(Here.shared.style(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())))
+                ZStack {
+                    Text(date.formatted(here.style(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())))
                         .monospacedDigit()
-                    Spacer()
-                    Button("Now") {
-                        moment.returnToNow()
+                    HStack {
+                        Spacer()
+                        Button("Now") {
+                            moment.glideToNow()
+                        }
+                        .opacity(moment.isLive ? 0 : 1)
+                        .allowsHitTesting(!moment.isLive)
                     }
-                    .opacity(moment.isLive ? 0 : 1)
-                    .allowsHitTesting(!moment.isLive)
                 }
-                Slider(
-                    value: Binding(
-                        get: { moment.minutesIntoDay(at: context.date) },
-                        set: { moment.choose(minutesIntoDay: $0, at: context.date) }
-                    ),
-                    in: 0...Self.lastMinuteOfDay,
-                    step: Self.stepMinutes
-                )
+                DayTrack(
+                    dayStart: here.calendar.startOfDay(for: date),
+                    minutes: moment.minutesIntoDay(at: context.date),
+                    coordinate: coordinate
+                ) { minutes in
+                    moment.choose(minutesIntoDay: minutes, at: context.date)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
+    }
+
+    private var coordinate: Coordinate {
+        here.coordinate ?? Coordinate(latitude: 0, longitude: Double(here.timeZone.secondsFromGMT()) / 240)
     }
 }
