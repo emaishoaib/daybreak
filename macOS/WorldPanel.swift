@@ -38,7 +38,7 @@ struct WorldPanel: View {
     }
 
     private var header: some View {
-        HStack {
+        HStack(spacing: 16) {
             if isSearching {
                 Text("Add a place")
                     .font(.headline)
@@ -55,6 +55,7 @@ struct WorldPanel: View {
             }
             .buttonStyle(.borderless)
             .accessibilityLabel(isSearching ? "Cancel" : "Add a place")
+            SettingsButton()
         }
     }
 
