@@ -4,6 +4,7 @@ import WorldTimeKit
 struct Globe: View {
     let places: [Place]
     let moment: ChosenMoment
+    let showsTimes: Bool
 
     @State private var orientation = GlobeOrientation(centreLongitude: Self.homeLongitude)
     @State private var dragStart: GlobeOrientation?
@@ -14,7 +15,7 @@ struct Globe: View {
             GeometryReader { geometry in
                 ZStack {
                     GlobeImage(orientation: orientation, sun: Sun.overhead(at: date))
-                    GlobePins(places: places, orientation: orientation, date: date)
+                    GlobePins(places: places, orientation: orientation, date: date, showsTimes: showsTimes)
                 }
                 .contentShape(Rectangle())
                 .gesture(drag(radius: min(geometry.size.width, geometry.size.height) / 2 * GlobeRenderer.radiusFraction))

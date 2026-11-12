@@ -7,6 +7,7 @@ struct GlobePins: View {
     let places: [Place]
     let orientation: GlobeOrientation
     let date: Date
+    let showsTimes: Bool
 
     var body: some View {
         GeometryReader { geometry in
@@ -16,7 +17,7 @@ struct GlobePins: View {
             ForEach(places) { place in
                 let point = orientation.viewPoint(of: place.coordinate)
                 if point.z > Self.visibleDepth {
-                    GlobePin(place: place, date: date)
+                    GlobePin(place: place, date: date, showsTime: showsTimes)
                         .position(x: centre.x + point.x * radius, y: centre.y - point.y * radius)
                 }
             }
@@ -28,6 +29,7 @@ struct GlobePins: View {
 private struct GlobePin: View {
     let place: Place
     let date: Date
+    let showsTime: Bool
 
     var body: some View {
         Circle()
@@ -35,13 +37,15 @@ private struct GlobePin: View {
             .frame(width: 6, height: 6)
             .shadow(color: .yellow, radius: 3)
             .overlay(alignment: .leading) {
-                Text(date.formatted(style))
-                    .font(.caption2)
-                    .monospacedDigit()
-                    .padding(.horizontal, 4)
-                    .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 4))
-                    .fixedSize()
-                    .offset(x: 10)
+                if showsTime {
+                    Text(date.formatted(style))
+                        .font(.caption2)
+                        .monospacedDigit()
+                        .padding(.horizontal, 4)
+                        .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 4))
+                        .fixedSize()
+                        .offset(x: 10)
+                }
             }
     }
 
