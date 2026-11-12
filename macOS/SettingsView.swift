@@ -43,6 +43,7 @@ struct SettingsView: View {
                 }
                 Section {
                     VersionRow()
+                    LabeledContent("Earth imagery", value: "NASA Earth Observatory")
                 }
             }
             .formStyle(.grouped)

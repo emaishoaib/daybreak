@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct WorldPanel: View {
+    private static let globeHeight: CGFloat = 240
+
     let zones: ZoneList
     let moment: ChosenMoment
 
@@ -22,6 +24,10 @@ struct WorldPanel: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+            if !isSearching {
+                Globe(places: zones.places, moment: moment)
+                    .frame(height: Self.globeHeight)
+            }
             content
             if !isSearching {
                 Divider()
