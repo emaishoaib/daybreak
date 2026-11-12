@@ -24,6 +24,7 @@ targets:
     platform: iOS
     sources:
       - iOS
+      - Shared
     dependencies:
       - package: WorldTimeKit
     info:
@@ -45,6 +46,7 @@ targets:
     platform: macOS
     sources:
       - macOS
+      - Shared
     dependencies:
       - package: WorldTimeKit
     info:

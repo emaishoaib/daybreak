@@ -4,13 +4,15 @@ struct PopUpContent: View {
     static let size = CGSize(width: 640, height: 560)
     static let worldWidth: CGFloat = 360
 
+    let zones: ZoneList
+
     @State private var settings = SettingsPage.shared
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
-                    PanelPlaceholder(title: "World")
+                    WorldPanel(zones: zones)
                         .frame(width: Self.worldWidth)
                     Divider()
                     PanelPlaceholder(title: "Calendar")

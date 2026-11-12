@@ -9,6 +9,7 @@ final class StatusItemController: NSObject {
     private static let reopenGuard: TimeInterval = 0.3
     private static let resizeDuration: TimeInterval = 0.3
 
+    private let zones = ZoneList()
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let panel = PopUpPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
     private var clickMonitor: Any?
@@ -17,7 +18,7 @@ final class StatusItemController: NSObject {
     override init() {
         super.init()
 
-        let content = NSHostingController(rootView: PopUpContent())
+        let content = NSHostingController(rootView: PopUpContent(zones: zones))
         content.sizingOptions = []
         panel.contentViewController = content
         panel.isOpaque = false
@@ -34,11 +35,17 @@ final class StatusItemController: NSObject {
         updateImage()
         observeSettingsPage()
         for name in [UserDefaults.didChangeNotification, .NSCalendarDayChanged, .NSSystemTimeZoneDidChange] {
-            NotificationCenter.default.addObserver(self, selector: #selector(updateImage), name: name, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(scheduleImageUpdate), name: name, object: nil)
         }
     }
 
-    @objc private func updateImage() {
+    @objc private func scheduleImageUpdate() {
+        Task { @MainActor [weak self] in
+            self?.updateImage()
+        }
+    }
+
+    private func updateImage() {
         statusItem.button?.image = MenuBarLabel.image(on: .now)
     }
 
