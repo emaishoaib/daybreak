@@ -2,25 +2,27 @@ import SwiftUI
 
 struct PopUpContent: View {
     static let width: CGFloat = 360
-    static let heightWithoutMonth: CGFloat = 560
 
     @MainActor
     static var height: CGFloat {
-        heightWithoutMonth + MonthPage.shared.addedHeight
+        PopUpLayout.shared.contentHeight
     }
 
     let zones: ZoneList
     let moment: ChosenMoment
 
     @State private var settings = SettingsPage.shared
+    @State private var layout = PopUpLayout.shared
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             VStack(spacing: 0) {
                 WorldPanel(zones: zones, moment: moment)
                 Divider()
                 FooterBar()
             }
+            .fixedSize(horizontal: false, vertical: true)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { layout.contentHeight = $0 }
             if settings.isShown {
                 SettingsView()
             }

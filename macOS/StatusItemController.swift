@@ -34,7 +34,7 @@ final class StatusItemController: NSObject {
 
         statusItem.expandedInterfaceDelegate = self
         updateImage()
-        observeMonthPage()
+        observeLayout()
         for name in [UserDefaults.didChangeNotification, .NSCalendarDayChanged, .NSSystemTimeZoneDidChange] {
             NotificationCenter.default.addObserver(self, selector: #selector(scheduleImageUpdate), name: name, object: nil)
         }
@@ -67,13 +67,13 @@ final class StatusItemController: NSObject {
         return NSRect(x: x, y: icon.minY - Self.gap - height, width: width, height: height)
     }
 
-    private func observeMonthPage() {
+    private func observeLayout() {
         withObservationTracking {
-            _ = MonthPage.shared.addedHeight
+            _ = PopUpLayout.shared.contentHeight
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in
                 self?.resize()
-                self?.observeMonthPage()
+                self?.observeLayout()
             }
         }
     }
@@ -90,7 +90,7 @@ final class StatusItemController: NSObject {
 
     private func show() {
         SettingsPage.shared.isShown = false
-        MonthPage.shared.isOpen = true
+        PopUpLayout.shared.isMonthOpen = true
         moment.returnToNow()
         panel.setFrame(frame(), display: true)
         NSApp.activate()
