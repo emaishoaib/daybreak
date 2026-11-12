@@ -34,7 +34,7 @@ final class StatusItemController: NSObject {
 
         statusItem.expandedInterfaceDelegate = self
         updateImage()
-        observeSettingsPage()
+        observeMonthPage()
         for name in [UserDefaults.didChangeNotification, .NSCalendarDayChanged, .NSSystemTimeZoneDidChange] {
             NotificationCenter.default.addObserver(self, selector: #selector(scheduleImageUpdate), name: name, object: nil)
         }
@@ -55,15 +55,11 @@ final class StatusItemController: NSObject {
         return window.convertToScreen(button.convert(button.bounds, to: nil))
     }
 
-    private var width: CGFloat {
-        SettingsPage.shared.isShown ? PopUpContent.worldWidth : PopUpContent.size.width
-    }
-
     private func frame() -> NSRect {
         let icon = iconFrame
-        let width = width
+        let width = PopUpContent.width
         var x = icon.midX - width / 2
-        var height = PopUpContent.size.height
+        var height = PopUpContent.height
         if let screen = statusItem.button?.window?.screen?.visibleFrame {
             x = min(max(x, screen.minX + Self.screenMargin), screen.maxX - width - Self.screenMargin)
             height = min(height, icon.minY - Self.gap - screen.minY - Self.screenMargin)
@@ -71,13 +67,13 @@ final class StatusItemController: NSObject {
         return NSRect(x: x, y: icon.minY - Self.gap - height, width: width, height: height)
     }
 
-    private func observeSettingsPage() {
+    private func observeMonthPage() {
         withObservationTracking {
-            _ = SettingsPage.shared.isShown
+            _ = MonthPage.shared.addedHeight
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in
                 self?.resize()
-                self?.observeSettingsPage()
+                self?.observeMonthPage()
             }
         }
     }
@@ -94,6 +90,7 @@ final class StatusItemController: NSObject {
 
     private func show() {
         SettingsPage.shared.isShown = false
+        MonthPage.shared.isOpen = true
         moment.returnToNow()
         panel.setFrame(frame(), display: true)
         NSApp.activate()

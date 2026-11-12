@@ -1,8 +1,13 @@
 import SwiftUI
 
 struct PopUpContent: View {
-    static let size = CGSize(width: 640, height: 560)
-    static let worldWidth: CGFloat = 360
+    static let width: CGFloat = 360
+    static let heightWithoutMonth: CGFloat = 560
+
+    @MainActor
+    static var height: CGFloat {
+        heightWithoutMonth + MonthPage.shared.addedHeight
+    }
 
     let zones: ZoneList
     let moment: ChosenMoment
@@ -10,24 +15,18 @@ struct PopUpContent: View {
     @State private var settings = SettingsPage.shared
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack {
             VStack(spacing: 0) {
-                HStack(spacing: 0) {
-                    WorldPanel(zones: zones, moment: moment)
-                        .frame(width: Self.worldWidth)
-                    Divider()
-                    CalendarPanel(zones: zones, moment: moment)
-                }
+                WorldPanel(zones: zones, moment: moment)
                 Divider()
                 FooterBar()
             }
-            .frame(width: Self.size.width, height: Self.size.height)
             if settings.isShown {
                 SettingsView()
-                    .frame(width: Self.worldWidth, height: Self.size.height)
             }
         }
-        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
+        .frame(width: Self.width)
+        .frame(maxHeight: .infinity, alignment: .top)
         .background(Palette.night)
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
