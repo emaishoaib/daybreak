@@ -28,8 +28,19 @@ struct WorldPanel: View {
                         .padding(.bottom, 8)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                HereHeading(moment: moment)
-                places
+                HereHeading(
+                    moment: moment,
+                    canExpand: zones.places.count > ZoneListView.collapsedCount,
+                    isExpanded: layout.isListExpanded
+                ) {
+                    withAnimation(.snappy) { layout.isListExpanded.toggle() }
+                } onAdd: {
+                    isSearching = true
+                }
+                if !zones.places.isEmpty {
+                    ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded)
+                        .padding(.bottom, 8)
+                }
                 Globe(places: zones.places, moment: moment)
                     .frame(height: Self.globeHeight)
                 Divider()
@@ -58,21 +69,6 @@ struct WorldPanel: View {
                 Spacer()
                 SettingsButton()
             }
-        }
-    }
-
-    @ViewBuilder
-    private var places: some View {
-        if !zones.places.isEmpty {
-            ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded)
-        }
-        PlacesFooter(
-            hiddenCount: max(0, zones.places.count - ZoneListView.collapsedCount),
-            isExpanded: layout.isListExpanded
-        ) {
-            isSearching = true
-        } onToggle: {
-            withAnimation(.snappy) { layout.isListExpanded.toggle() }
         }
     }
 }
