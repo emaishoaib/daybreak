@@ -22,9 +22,12 @@ struct WorldPanel: View {
                 }
                 .frame(height: Self.searchHeight)
             } else {
-                MonthCard(moment: moment)
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 8)
+                if layout.isMonthOpen {
+                    MonthCard(moment: moment)
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
                 places
                 Globe(places: zones.places, moment: moment)
                     .frame(height: Self.globeHeight)
@@ -40,7 +43,9 @@ struct WorldPanel: View {
                 Text("Add a place")
                     .font(.headline)
             } else {
-                DateTitle(moment: moment)
+                DateButton(moment: moment, isOpen: layout.isMonthOpen) {
+                    withAnimation(.snappy) { layout.isMonthOpen.toggle() }
+                }
             }
             Spacer()
             Button {

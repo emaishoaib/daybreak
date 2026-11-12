@@ -13,6 +13,7 @@ final class StatusItemController: NSObject {
     private let moment = ChosenMoment()
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let panel = PopUpPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
+    private var content: NSHostingController<PopUpContent>?
     private var clickMonitor: Any?
     private var hiddenAt = Date.distantPast
 
@@ -21,7 +22,12 @@ final class StatusItemController: NSObject {
 
         let content = NSHostingController(rootView: PopUpContent(zones: zones, moment: moment))
         content.sizingOptions = []
-        panel.contentViewController = content
+        let container = NSView()
+        content.view.frame = container.bounds
+        content.view.autoresizingMask = [.width, .height]
+        container.addSubview(content.view)
+        panel.contentView = container
+        self.content = content
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
