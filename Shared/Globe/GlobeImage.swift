@@ -3,6 +3,7 @@ import WorldTimeKit
 
 struct GlobeImage: View {
     let orientation: GlobeOrientation
+    let zoom: Double
     let sun: Coordinate
 
     @Environment(\.displayScale) private var displayScale
@@ -13,6 +14,7 @@ struct GlobeImage: View {
                 width: Int(geometry.size.width * displayScale),
                 height: Int(geometry.size.height * displayScale),
                 orientation: orientation,
+                zoom: zoom,
                 sun: sun
             ) {
                 Image(decorative: image, scale: displayScale)

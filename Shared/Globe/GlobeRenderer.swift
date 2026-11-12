@@ -17,6 +17,7 @@ final class GlobeRenderer {
         let width: Int
         let height: Int
         let orientation: GlobeOrientation
+        let zoom: Double
         let sun: Coordinate
     }
 
@@ -24,8 +25,12 @@ final class GlobeRenderer {
     private var target: MTLTexture?
     private var last: (request: Request, image: CGImage)?
 
-    func image(width: Int, height: Int, orientation: GlobeOrientation, sun: Coordinate) -> CGImage? {
-        let request = Request(width: width, height: height, orientation: orientation, sun: sun)
+    static func radius(for size: CGSize, zoom: Double) -> Double {
+        min(size.width, size.height) / 2 * radiusFraction * zoom
+    }
+
+    func image(width: Int, height: Int, orientation: GlobeOrientation, zoom: Double, sun: Coordinate) -> CGImage? {
+        let request = Request(width: width, height: height, orientation: orientation, zoom: zoom, sun: sun)
         if let last, last.request == request { return last.image }
         guard width > 0, height > 0, let resources, let image = render(request, with: resources) else { return nil }
         last = (request, image)
@@ -65,7 +70,7 @@ final class GlobeRenderer {
 
     private static func uniforms(for request: Request) -> GlobeUniforms {
         let sunPoint = request.orientation.viewPoint(of: request.sun)
-        let radius = Double(min(request.width, request.height)) / 2 * radiusFraction
+        let radius = radius(for: CGSize(width: request.width, height: request.height), zoom: request.zoom)
         return GlobeUniforms(
             sun: SIMD4(Float(sunPoint.x), Float(sunPoint.y), Float(sunPoint.z), 0),
             orientation: SIMD4(Float(request.orientation.centreLongitude * .pi / 180), Float(request.orientation.tilt * .pi / 180), 0, 0),

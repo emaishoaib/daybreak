@@ -6,11 +6,12 @@ struct GlobePins: View {
 
     let places: [Place]
     let orientation: GlobeOrientation
+    let zoom: Double
     let date: Date
 
     var body: some View {
         GeometryReader { geometry in
-            let radius = min(geometry.size.width, geometry.size.height) / 2 * GlobeRenderer.radiusFraction
+            let radius = GlobeRenderer.radius(for: geometry.size, zoom: zoom)
             let centre = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
 
             ForEach(places) { place in

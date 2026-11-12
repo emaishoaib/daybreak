@@ -2,17 +2,22 @@ import Foundation
 
 public struct GlobeOrientation: Hashable, Sendable {
     public static let defaultTiltDegrees = 18.0
+    public static let tiltLimitDegrees = 80.0
 
     public private(set) var centreLongitude: Double
-    public let tilt: Double
+    public private(set) var tilt: Double
 
     public init(centreLongitude: Double, tilt: Double = defaultTiltDegrees) {
         self.centreLongitude = Self.wrapped(centreLongitude)
-        self.tilt = tilt
+        self.tilt = min(max(tilt, -Self.tiltLimitDegrees), Self.tiltLimitDegrees)
     }
 
     public func turned(byDegrees degrees: Double) -> GlobeOrientation {
         GlobeOrientation(centreLongitude: centreLongitude + degrees, tilt: tilt)
+    }
+
+    public func tilted(byDegrees degrees: Double) -> GlobeOrientation {
+        GlobeOrientation(centreLongitude: centreLongitude, tilt: tilt + degrees)
     }
 
     public func viewPoint(of coordinate: Coordinate) -> ViewPoint {

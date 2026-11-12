@@ -37,4 +37,15 @@ struct GlobeOrientationTests {
         let orientation = GlobeOrientation(centreLongitude: 0, tilt: 0).turned(byDegrees: 90)
         #expect(isClose(orientation.viewPoint(of: Coordinate(latitude: 0, longitude: 90)), 0, 0, 1))
     }
+
+    @Test func tiltingMovesTheCentreNorth() {
+        let orientation = GlobeOrientation(centreLongitude: 0, tilt: 0).tilted(byDegrees: 50)
+        let london = orientation.viewPoint(of: Coordinate(latitude: 50, longitude: 0))
+        #expect(abs(london.z - 1) < 1e-9)
+    }
+
+    @Test func tiltingStopsShortOfThePoles() {
+        #expect(GlobeOrientation(centreLongitude: 0).tilted(byDegrees: 200).tilt == GlobeOrientation.tiltLimitDegrees)
+        #expect(GlobeOrientation(centreLongitude: 0).tilted(byDegrees: -200).tilt == -GlobeOrientation.tiltLimitDegrees)
+    }
 }
