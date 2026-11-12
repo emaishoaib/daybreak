@@ -42,7 +42,7 @@ enum MenuBarLabel {
     }
 
     private static func style(for parts: Set<MenuBarPart>) -> Date.FormatStyle {
-        parts.reduce(Date.FormatStyle()) { style, part in
+        parts.reduce(Here.shared.style(Date.FormatStyle())) { style, part in
             switch part {
             case .weekday: style.weekday(.abbreviated)
             case .day: style.day()
@@ -75,9 +75,9 @@ private struct CalendarPageLabel: View {
 
     var body: some View {
         VStack(spacing: -2.5) {
-            Text(date.formatted(.dateTime.month(.abbreviated)).uppercased())
+            Text(date.formatted(Here.shared.style(.dateTime.month(.abbreviated))).uppercased())
                 .font(.system(size: 6, weight: .bold))
-            Text(date.formatted(.dateTime.day()))
+            Text(date.formatted(Here.shared.style(.dateTime.day())))
                 .font(.system(size: 10, weight: .semibold))
                 .monospacedDigit()
         }

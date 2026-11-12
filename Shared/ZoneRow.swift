@@ -6,7 +6,7 @@ struct ZoneRow: View {
     let date: Date
 
     var body: some View {
-        let home = TimeZone.autoupdatingCurrent
+        let home = Here.shared.timeZone
 
         HStack(spacing: 10) {
             DaylightIcon(daylight: place.daylight(at: date))

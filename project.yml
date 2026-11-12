@@ -38,6 +38,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Daybreak
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Daybreak uses your location to show your own time, country and time zone.
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         TARGETED_DEVICE_FAMILY: "1"
 
@@ -49,6 +50,10 @@ targets:
       - Shared
     dependencies:
       - package: WorldTimeKit
+    entitlements:
+      path: macOS/Daybreak.entitlements
+      properties:
+        com.apple.security.personal-information.location: true
     info:
       path: macOS/Info.plist
     settings:
@@ -59,3 +64,5 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Daybreak
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSLocationUsageDescription: Daybreak uses your location to show your own time, country and time zone.
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Daybreak uses your location to show your own time, country and time zone.

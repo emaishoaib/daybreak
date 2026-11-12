@@ -9,7 +9,7 @@ struct MonthCard: View {
     var body: some View {
         TimelineView(.everyMinute) { context in
             let date = moment.date(at: context.date)
-            let calendar = Calendar.autoupdatingCurrent
+            let calendar = Here.shared.calendar
             let grid = MonthGrid(containing: shownMonth ?? date, calendar: calendar)
 
             VStack(spacing: 8) {
@@ -18,7 +18,7 @@ struct MonthCard: View {
                         shownMonth = calendar.date(byAdding: .month, value: -1, to: grid.start)
                     }
                     Spacer()
-                    Text(grid.start.formatted(.dateTime.month(.wide).year()))
+                    Text(grid.start.formatted(Here.shared.style(.dateTime.month(.wide).year())))
                         .font(.subheadline.weight(.semibold))
                     Spacer()
                     MonthArrow(symbol: "chevron.right", label: "Next month") {

@@ -41,6 +41,8 @@ final class StatusItemController: NSObject {
         statusItem.expandedInterfaceDelegate = self
         updateImage()
         observeLayout()
+        observeHere()
+        Task { await Here.shared.refresh() }
         for name in [UserDefaults.didChangeNotification, .NSCalendarDayChanged, .NSSystemTimeZoneDidChange] {
             NotificationCenter.default.addObserver(self, selector: #selector(scheduleImageUpdate), name: name, object: nil)
         }
@@ -73,6 +75,17 @@ final class StatusItemController: NSObject {
         return NSRect(x: x, y: icon.minY - Self.gap - height, width: width, height: height)
     }
 
+    private func observeHere() {
+        withObservationTracking {
+            _ = Here.shared.timeZone
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.updateImage()
+                self?.observeHere()
+            }
+        }
+    }
+
     private func observeLayout() {
         withObservationTracking {
             _ = PopUpLayout.shared.contentHeight
@@ -97,6 +110,7 @@ final class StatusItemController: NSObject {
     private func show() {
         SettingsPage.shared.isShown = false
         moment.returnToNow()
+        Task { await Here.shared.refresh() }
         panel.setFrame(frame(), display: true)
         NSApp.activate()
         panel.makeKeyAndOrderFront(nil)

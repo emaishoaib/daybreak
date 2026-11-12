@@ -6,7 +6,7 @@ struct Globe: View {
     let moment: ChosenMoment
     let flight: GlobeFlight?
 
-    @State private var camera = GlobeCamera(orientation: GlobeOrientation(centreLongitude: Self.homeLongitude))
+    @State private var camera = GlobeCamera(orientation: GlobeOrientation(centreLongitude: MainActor.assumeIsolated { Self.homeLongitude }))
     @State private var motion: GlobeMotion?
     @State private var dragStart: GlobeCamera?
     @State private var pinchStart: GlobeCamera?
@@ -43,7 +43,7 @@ struct Globe: View {
     }
 
     private static var homeLongitude: Double {
-        Double(TimeZone.autoupdatingCurrent.secondsFromGMT()) / 240
+        Here.shared.coordinate?.longitude ?? Double(Here.shared.timeZone.secondsFromGMT()) / 240
     }
 
     private func move(to target: GlobeCamera, seconds: TimeInterval) {

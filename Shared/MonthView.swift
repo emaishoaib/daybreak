@@ -8,7 +8,7 @@ struct MonthView: View {
     let onPick: (Date) -> Void
 
     var body: some View {
-        let calendar = Calendar.autoupdatingCurrent
+        let calendar = Here.shared.calendar
 
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 7), spacing: 8) {
             ForEach(grid.weekdaySymbols.indices, id: \.self) { index in

@@ -24,16 +24,16 @@ final class ChosenMoment {
 
     func minutesIntoDay(at now: Date) -> Double {
         let date = date(at: now)
-        return date.timeIntervalSince(Calendar.autoupdatingCurrent.startOfDay(for: date)) / 60
+        return date.timeIntervalSince(Here.shared.calendar.startOfDay(for: date)) / 60
     }
 
     func choose(minutesIntoDay minutes: Double, at now: Date) {
-        let start = Calendar.autoupdatingCurrent.startOfDay(for: date(at: now))
+        let start = Here.shared.calendar.startOfDay(for: date(at: now))
         state = .chosen(start.addingTimeInterval(minutes * 60))
     }
 
     func choose(day: Date, at now: Date) {
-        let calendar = Calendar.autoupdatingCurrent
+        let calendar = Here.shared.calendar
         guard !(isLive && calendar.isDate(day, inSameDayAs: now)) else { return }
         let minutes = minutesIntoDay(at: now)
         state = .chosen(calendar.startOfDay(for: day).addingTimeInterval(minutes * 60))

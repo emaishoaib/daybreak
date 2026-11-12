@@ -14,7 +14,7 @@ struct TimeScrubber: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text(moment.date(at: context.date).formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute()))
+                    Text(moment.date(at: context.date).formatted(Here.shared.style(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())))
                         .monospacedDigit()
                     Spacer()
                     Button("Now") {
