@@ -1,13 +1,22 @@
+import AppKit
 import SwiftUI
 
 @main
 struct DaybreakMacApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     var body: some Scene {
-        MenuBarExtra("Daybreak", systemImage: "sun.horizon") {
-            Button("Quit Daybreak") {
-                NSApplication.shared.terminate(nil)
-            }
-            .keyboardShortcut("q")
+        Settings {
+            EmptyView()
         }
+    }
+}
+
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var statusItem: StatusItemController?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        statusItem = StatusItemController()
     }
 }
