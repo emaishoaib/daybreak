@@ -9,23 +9,44 @@ struct Globe: View {
     @State private var zoom = GlobeZoom.range.lowerBound
     @State private var dragStart: GlobeOrientation?
     @State private var pinchStart: Double?
+    @State private var zoomTransition: GlobeZoom.Transition?
 
     var body: some View {
         TimelineView(.everyMinute) { context in
             let date = moment.date(at: context.date)
-            GeometryReader { geometry in
-                ZStack {
-                    GlobeImage(orientation: orientation, zoom: zoom, sun: Sun.overhead(at: date))
-                    GlobePins(places: places, orientation: orientation, zoom: zoom, date: date)
+            TimelineView(.animation(paused: zoomTransition == nil)) { frame in
+                let shownZoom = zoomTransition?.zoom(at: frame.date) ?? zoom
+                GeometryReader { geometry in
+                    ZStack {
+                        GlobeImage(orientation: orientation, zoom: shownZoom, sun: Sun.overhead(at: date))
+                        GlobePins(places: places, orientation: orientation, zoom: shownZoom, date: date)
+                    }
+                    .contentShape(Rectangle())
+                    .gesture(drag(radius: GlobeRenderer.radius(for: geometry.size, zoom: shownZoom)))
+                    .simultaneousGesture(pinch)
                 }
-                .contentShape(Rectangle())
-                .gesture(drag(radius: GlobeRenderer.radius(for: geometry.size, zoom: zoom)))
-                .simultaneousGesture(pinch)
             }
             .clipped()
             .overlay(alignment: .bottomTrailing) {
-                ZoomButtons(zoom: $zoom)
-                    .padding(8)
+                GlobeZoomButtons {
+                    animateZoom(to: GlobeZoom.zoomedIn(from: zoom))
+                } onZoomOut: {
+                    animateZoom(to: GlobeZoom.zoomedOut(from: zoom))
+                }
+                .padding(8)
+            }
+        }
+    }
+
+    private func animateZoom(to target: Double) {
+        let now = Date.now
+        let transition = GlobeZoom.Transition(from: zoomTransition?.zoom(at: now) ?? zoom, to: target, start: now)
+        zoom = target
+        zoomTransition = transition
+        Task {
+            try? await Task.sleep(for: .seconds(GlobeZoom.Transition.durationSeconds))
+            if zoomTransition == transition {
+                zoomTransition = nil
             }
         }
     }
@@ -53,46 +74,11 @@ struct Globe: View {
             .onChanged { value in
                 let start = pinchStart ?? zoom
                 pinchStart = start
+                zoomTransition = nil
                 zoom = GlobeZoom.clamped(start * value.magnification)
             }
             .onEnded { _ in
                 pinchStart = nil
             }
-    }
-}
-
-private struct ZoomButtons: View {
-    @Binding var zoom: Double
-
-    var body: some View {
-        VStack(spacing: 0) {
-            ZoomButton(symbol: "plus", label: "Zoom in") {
-                zoom = GlobeZoom.zoomedIn(from: zoom)
-            }
-            Divider()
-                .frame(width: 18)
-            ZoomButton(symbol: "minus", label: "Zoom out") {
-                zoom = GlobeZoom.zoomedOut(from: zoom)
-            }
-        }
-        .background(.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 8))
-    }
-}
-
-private struct ZoomButton: View {
-    let symbol: String
-    let label: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.caption.weight(.semibold))
-                .frame(width: 26, height: 24)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(.secondary)
-        .accessibilityLabel(label)
     }
 }
