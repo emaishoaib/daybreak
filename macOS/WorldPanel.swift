@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WorldPanel: View {
     let zones: ZoneList
+    let moment: ChosenMoment
 
     @State private var isSearching = false
 
@@ -22,6 +23,10 @@ struct WorldPanel: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             content
+            if !isSearching {
+                Divider()
+                TimeScrubber(moment: moment)
+            }
         }
     }
 
@@ -37,7 +42,7 @@ struct WorldPanel: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            ZoneListView(zones: zones)
+            ZoneListView(zones: zones, moment: moment)
         }
     }
 }

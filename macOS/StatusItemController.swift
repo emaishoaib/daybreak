@@ -10,6 +10,7 @@ final class StatusItemController: NSObject {
     private static let resizeDuration: TimeInterval = 0.3
 
     private let zones = ZoneList()
+    private let moment = ChosenMoment()
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let panel = PopUpPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
     private var clickMonitor: Any?
@@ -18,7 +19,7 @@ final class StatusItemController: NSObject {
     override init() {
         super.init()
 
-        let content = NSHostingController(rootView: PopUpContent(zones: zones))
+        let content = NSHostingController(rootView: PopUpContent(zones: zones, moment: moment))
         content.sizingOptions = []
         panel.contentViewController = content
         panel.isOpaque = false
@@ -93,6 +94,7 @@ final class StatusItemController: NSObject {
 
     private func show() {
         SettingsPage.shared.isShown = false
+        moment.returnToNow()
         panel.setFrame(frame(), display: true)
         NSApp.activate()
         panel.makeKeyAndOrderFront(nil)

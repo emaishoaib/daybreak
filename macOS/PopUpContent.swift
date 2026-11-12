@@ -5,6 +5,7 @@ struct PopUpContent: View {
     static let worldWidth: CGFloat = 360
 
     let zones: ZoneList
+    let moment: ChosenMoment
 
     @State private var settings = SettingsPage.shared
 
@@ -12,7 +13,7 @@ struct PopUpContent: View {
         ZStack(alignment: .topLeading) {
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
-                    WorldPanel(zones: zones)
+                    WorldPanel(zones: zones, moment: moment)
                         .frame(width: Self.worldWidth)
                     Divider()
                     PanelPlaceholder(title: "Calendar")

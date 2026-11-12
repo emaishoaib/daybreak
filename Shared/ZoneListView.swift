@@ -2,12 +2,13 @@ import SwiftUI
 
 struct ZoneListView: View {
     let zones: ZoneList
+    let moment: ChosenMoment
 
     var body: some View {
         TimelineView(.everyMinute) { context in
             List {
                 ForEach(zones.places) { place in
-                    ZoneRow(place: place, date: context.date)
+                    ZoneRow(place: place, date: moment.date(at: context.date))
                         .listRowBackground(Color.clear)
                         .contextMenu {
                             Button("Remove", role: .destructive) {
