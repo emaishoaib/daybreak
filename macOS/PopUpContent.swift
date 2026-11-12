@@ -16,7 +16,7 @@ struct PopUpContent: View {
                     WorldPanel(zones: zones, moment: moment)
                         .frame(width: Self.worldWidth)
                     Divider()
-                    PanelPlaceholder(title: "Calendar")
+                    CalendarPanel(zones: zones, moment: moment)
                 }
                 Divider()
                 FooterBar()
@@ -30,16 +30,5 @@ struct PopUpContent: View {
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
         .background(Palette.night)
         .clipShape(RoundedRectangle(cornerRadius: 14))
-    }
-}
-
-private struct PanelPlaceholder: View {
-    let title: String
-
-    var body: some View {
-        Text(title)
-            .font(.title3)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

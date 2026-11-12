@@ -32,6 +32,13 @@ final class ChosenMoment {
         state = .chosen(start.addingTimeInterval(minutes * 60))
     }
 
+    func choose(day: Date, at now: Date) {
+        let calendar = Calendar.autoupdatingCurrent
+        guard !(isLive && calendar.isDate(day, inSameDayAs: now)) else { return }
+        let minutes = minutesIntoDay(at: now)
+        state = .chosen(calendar.startOfDay(for: day).addingTimeInterval(minutes * 60))
+    }
+
     func returnToNow() {
         state = .live
     }
