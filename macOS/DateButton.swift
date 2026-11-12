@@ -10,14 +10,11 @@ struct DateButton: View {
             Button(action: onToggle) {
                 HStack(spacing: 4) {
                     Text(moment.date(at: context.date).formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
-                        .font(.headline)
                     Image(systemName: isOpen ? "chevron.up" : "chevron.down")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(.white.opacity(isOpen ? 0.12 : 0.06), in: RoundedRectangle(cornerRadius: 6))
+                .headingPill()
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

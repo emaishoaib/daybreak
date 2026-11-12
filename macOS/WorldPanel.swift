@@ -28,6 +28,7 @@ struct WorldPanel: View {
                         .padding(.bottom, 8)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
+                HereHeading(moment: moment)
                 places
                 Globe(places: zones.places, moment: moment)
                     .frame(height: Self.globeHeight)
@@ -38,40 +39,40 @@ struct WorldPanel: View {
     }
 
     private var header: some View {
-        HStack(spacing: 16) {
+        HStack {
             if isSearching {
                 Text("Add a place")
                     .font(.headline)
+                Spacer()
+                Button {
+                    isSearching = false
+                } label: {
+                    Image(systemName: "xmark")
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("Cancel")
             } else {
                 DateButton(moment: moment, isOpen: layout.isMonthOpen) {
                     withAnimation(.snappy) { layout.isMonthOpen.toggle() }
                 }
+                Spacer()
+                SettingsButton()
             }
-            Spacer()
-            Button {
-                isSearching.toggle()
-            } label: {
-                Image(systemName: isSearching ? "xmark" : "plus")
-            }
-            .buttonStyle(.borderless)
-            .accessibilityLabel(isSearching ? "Cancel" : "Add a place")
-            SettingsButton()
         }
     }
 
     @ViewBuilder
     private var places: some View {
-        if zones.places.isEmpty {
-            Text("Add a place with the plus button")
-                .foregroundStyle(.secondary)
-                .padding(.vertical, 16)
-        } else {
+        if !zones.places.isEmpty {
             ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded)
-            if zones.places.count > ZoneListView.collapsedCount {
-                ListExpander(hiddenCount: zones.places.count - ZoneListView.collapsedCount, isExpanded: layout.isListExpanded) {
-                    withAnimation(.snappy) { layout.isListExpanded.toggle() }
-                }
-            }
+        }
+        PlacesFooter(
+            hiddenCount: max(0, zones.places.count - ZoneListView.collapsedCount),
+            isExpanded: layout.isListExpanded
+        ) {
+            isSearching = true
+        } onToggle: {
+            withAnimation(.snappy) { layout.isListExpanded.toggle() }
         }
     }
 }
