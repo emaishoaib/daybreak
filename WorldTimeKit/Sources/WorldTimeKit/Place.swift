@@ -17,6 +17,15 @@ public struct Place: Codable, Hashable, Sendable, Identifiable {
         "\(timeZoneIdentifier)/\(name)"
     }
 
+    public var shortCode: String {
+        let name = name.split(separator: ",").first.map(String.init) ?? name
+        let words = name.split(separator: " ").filter { $0.first?.isUppercase == true }
+        guard words.count > 1 else {
+            return String(name.filter(\.isLetter).prefix(3)).uppercased()
+        }
+        return String(words.prefix(3).compactMap(\.first)).uppercased()
+    }
+
     public var timeZone: TimeZone {
         TimeZone(identifier: timeZoneIdentifier) ?? .gmt
     }

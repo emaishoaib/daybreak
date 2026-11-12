@@ -42,6 +42,8 @@ final class StatusItemController: NSObject {
         updateImage()
         observeLayout()
         observeHere()
+        observeMenuBarPlaces()
+        tickEachMinute()
         Here.shared.onTravel = { [weak self] left, arrived in
             guard UserDefaults.standard.bool(forKey: SmartSwapSetting.key) else { return }
             self?.zones.travel(leaving: left, arrivingIn: arrived.identifier)
@@ -59,7 +61,32 @@ final class StatusItemController: NSObject {
     }
 
     private func updateImage() {
-        statusItem.button?.image = MenuBarLabel.image(on: .now)
+        statusItem.button?.image = MenuBarLabel.image(on: .now, places: zones.menuBarPlaces)
+    }
+
+    private func observeMenuBarPlaces() {
+        withObservationTracking {
+            _ = zones.menuBarPlaces
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.updateImage()
+                self?.observeMenuBarPlaces()
+            }
+        }
+    }
+
+    private func tickEachMinute() {
+        Task { [weak self] in
+            while !Task.isCancelled {
+                let now = Date.now
+                let nextMinute = Calendar.current.nextDate(after: now, matching: DateComponents(second: 0), matchingPolicy: .nextTime) ?? now.addingTimeInterval(60)
+                try? await Task.sleep(for: .seconds(nextMinute.timeIntervalSince(now) + 0.05))
+                guard let self else { return }
+                if !self.zones.menuBarPlaces.isEmpty {
+                    self.updateImage()
+                }
+            }
+        }
     }
 
     private var iconFrame: NSRect {

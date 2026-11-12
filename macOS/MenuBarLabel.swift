@@ -1,13 +1,25 @@
 import AppKit
 import SwiftUI
+import WorldTimeKit
 
 @MainActor
 enum MenuBarLabel {
-    static func image(on date: Date) -> NSImage {
+    private static let placeSpacing: CGFloat = 10
+
+    static func image(on date: Date, places: [Place]) -> NSImage {
         let layout = MenuBarLayout.current
         let parts = MenuBarPart.shown
-        guard layout == .calendarPage || !parts.isEmpty, let image = render(label(layout: layout, parts: parts, date: date)) else { return fallback }
-        return image
+        let showsDate = layout == .calendarPage || !parts.isEmpty
+        guard showsDate || !places.isEmpty else { return fallback }
+        let content = HStack(spacing: placeSpacing) {
+            ForEach(places) { place in
+                PlaceLabel(place: place, date: date)
+            }
+            if showsDate {
+                label(layout: layout, parts: parts, date: date)
+            }
+        }
+        return render(content) ?? fallback
     }
 
     private static var fallback: NSImage {
@@ -49,6 +61,27 @@ enum MenuBarLabel {
             case .month: style.month(.abbreviated)
             }
         }
+    }
+}
+
+private struct PlaceLabel: View {
+    let place: Place
+    let date: Date
+
+    var body: some View {
+        VStack(spacing: -2.5) {
+            Text(place.shortCode)
+                .font(.system(size: 11.5, weight: .semibold))
+            Text(date.formatted(style))
+                .font(.system(size: 11.5))
+                .monospacedDigit()
+        }
+    }
+
+    private var style: Date.FormatStyle {
+        var style = Date.FormatStyle.dateTime.hour().minute()
+        style.timeZone = place.timeZone
+        return style
     }
 }
 

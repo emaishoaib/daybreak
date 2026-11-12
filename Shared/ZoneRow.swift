@@ -4,18 +4,27 @@ import WorldTimeKit
 struct ZoneRow: View {
     let place: Place
     let date: Date
+    var isInMenuBar = false
+    var onToggleMenuBar: (() -> Void)?
 
     var body: some View {
         let home = Here.shared.timeZone
 
-        HStack(spacing: 10) {
-            DaylightIcon(daylight: place.daylight(at: date))
+        HStack(spacing: RowLayout.columnSpacing) {
+            #if os(macOS)
+            MenuBarPin(isPinned: isInMenuBar) {
+                onToggleMenuBar?()
+            }
+            #endif
             VStack(alignment: .leading, spacing: 1) {
                 Text("\(place.name) \(Text("(\(place.timeZone.abbreviation(for: date) ?? place.timeZoneIdentifier))").foregroundStyle(.secondary))")
                     .lineLimit(1)
-                Text(Self.offsetText(place.offset(from: home, at: date)))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: RowLayout.subtitleSpacing) {
+                    DaylightIcon(daylight: place.daylight(at: date))
+                    Text(Self.offsetText(place.offset(from: home, at: date)))
+                        .foregroundStyle(.secondary)
+                }
+                .font(.caption)
             }
             Spacer()
             if place.dayDifference(from: home, at: date) != 0 {
@@ -50,7 +59,7 @@ private struct DaylightIcon: View {
     var body: some View {
         Image(systemName: symbol)
             .foregroundStyle(colour)
-            .frame(width: 20)
+            .frame(width: RowLayout.subtitleIconWidth)
     }
 
     private var symbol: String {

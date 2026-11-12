@@ -8,10 +8,10 @@ struct HereRow: View {
     var body: some View {
         let zone = here.timeZone.abbreviation(for: date) ?? here.timeZone.identifier
 
-        HStack(spacing: 10) {
+        HStack(spacing: RowLayout.columnSpacing) {
             Image(systemName: "location.fill")
                 .foregroundStyle(.blue)
-                .frame(width: 20)
+                .frame(width: RowLayout.leadingWidth)
             VStack(alignment: .leading, spacing: 1) {
                 Text("\(here.country ?? here.timeZone.identifier) \(Text("(\(zone))").foregroundStyle(.secondary))")
                     .lineLimit(1)
@@ -24,8 +24,6 @@ struct HereRow: View {
                 .font(.title3)
                 .monospacedDigit()
         }
-        .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .background(.blue.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
     }
 }

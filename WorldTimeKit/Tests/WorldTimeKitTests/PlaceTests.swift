@@ -57,4 +57,26 @@ struct PlaceTests {
     @Test func identityCombinesTheZoneAndTheName() {
         #expect(tokyo.id == "Asia/Tokyo/Tokyo")
     }
+
+    func place(named name: String) -> Place {
+        Place(name: name, timeZoneIdentifier: "UTC", coordinate: Coordinate(latitude: 0, longitude: 0))
+    }
+
+    @Test func aOneWordPlaceIsShortenedToItsFirstThreeLetters() {
+        #expect(place(named: "Cairo").shortCode == "CAI")
+        #expect(place(named: "Amsterdam").shortCode == "AMS")
+    }
+
+    @Test func aPlaceOfSeveralWordsIsShortenedToItsInitials() {
+        #expect(place(named: "New York").shortCode == "NY")
+        #expect(place(named: "United Kingdom").shortCode == "UK")
+    }
+
+    @Test func smallLinkingWordsAreLeftOutOfTheInitials() {
+        #expect(place(named: "Rio de Janeiro").shortCode == "RJ")
+    }
+
+    @Test func anythingAfterACommaIsIgnored() {
+        #expect(place(named: "Hong Kong, China").shortCode == "HK")
+    }
 }
