@@ -4,19 +4,28 @@ struct PopUpContent: View {
     static let size = CGSize(width: 640, height: 560)
     static let worldWidth: CGFloat = 360
 
+    @State private var settings = SettingsPage.shared
+
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 0) {
-                PanelPlaceholder(title: "World")
-                    .frame(width: Self.worldWidth)
+        ZStack(alignment: .topLeading) {
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    PanelPlaceholder(title: "World")
+                        .frame(width: Self.worldWidth)
+                    Divider()
+                    PanelPlaceholder(title: "Calendar")
+                }
                 Divider()
-                PanelPlaceholder(title: "Calendar")
+                FooterBar()
             }
-            Divider()
-            QuitBar()
+            .frame(width: Self.size.width, height: Self.size.height)
+            if settings.isShown {
+                SettingsView()
+                    .frame(width: Self.worldWidth, height: Self.size.height)
+            }
         }
-        .frame(width: Self.size.width, height: Self.size.height)
-        .background(Color(white: 0.11))
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
+        .background(Palette.night)
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }

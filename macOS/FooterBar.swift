@@ -1,9 +1,10 @@
 import AppKit
 import SwiftUI
 
-struct QuitBar: View {
+struct FooterBar: View {
     var body: some View {
         HStack {
+            SettingsButton()
             Spacer()
             Button("Quit Daybreak") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q")

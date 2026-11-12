@@ -1,4 +1,5 @@
 import AppKit
+import Observation
 import SwiftUI
 
 @MainActor
@@ -6,6 +7,7 @@ final class StatusItemController: NSObject {
     private static let gap: CGFloat = 6
     private static let screenMargin: CGFloat = 8
     private static let reopenGuard: TimeInterval = 0.3
+    private static let resizeDuration: TimeInterval = 0.3
 
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let panel = PopUpPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
@@ -29,13 +31,15 @@ final class StatusItemController: NSObject {
         }
 
         statusItem.expandedInterfaceDelegate = self
-        statusItem.button?.image = Self.placeholderImage
+        updateImage()
+        observeSettingsPage()
+        for name in [UserDefaults.didChangeNotification, .NSCalendarDayChanged, .NSSystemTimeZoneDidChange] {
+            NotificationCenter.default.addObserver(self, selector: #selector(updateImage), name: name, object: nil)
+        }
     }
 
-    private static var placeholderImage: NSImage {
-        let image = NSImage(systemSymbolName: "sun.horizon", accessibilityDescription: "Daybreak") ?? NSImage()
-        image.isTemplate = true
-        return image
+    @objc private func updateImage() {
+        statusItem.button?.image = MenuBarLabel.image(on: .now)
     }
 
     private var iconFrame: NSRect {
@@ -43,19 +47,45 @@ final class StatusItemController: NSObject {
         return window.convertToScreen(button.convert(button.bounds, to: nil))
     }
 
+    private var width: CGFloat {
+        SettingsPage.shared.isShown ? PopUpContent.worldWidth : PopUpContent.size.width
+    }
+
     private func frame() -> NSRect {
         let icon = iconFrame
-        let size = PopUpContent.size
-        var x = icon.midX - size.width / 2
-        var height = size.height
+        let width = width
+        var x = icon.midX - width / 2
+        var height = PopUpContent.size.height
         if let screen = statusItem.button?.window?.screen?.visibleFrame {
-            x = min(max(x, screen.minX + Self.screenMargin), screen.maxX - size.width - Self.screenMargin)
+            x = min(max(x, screen.minX + Self.screenMargin), screen.maxX - width - Self.screenMargin)
             height = min(height, icon.minY - Self.gap - screen.minY - Self.screenMargin)
         }
-        return NSRect(x: x, y: icon.minY - Self.gap - height, width: size.width, height: height)
+        return NSRect(x: x, y: icon.minY - Self.gap - height, width: width, height: height)
+    }
+
+    private func observeSettingsPage() {
+        withObservationTracking {
+            _ = SettingsPage.shared.isShown
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.resize()
+                self?.observeSettingsPage()
+            }
+        }
+    }
+
+    private func resize() {
+        let frame = frame()
+        guard panel.isVisible, panel.frame != frame else { return }
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = Self.resizeDuration
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            panel.animator().setFrame(frame, display: true)
+        }
     }
 
     private func show() {
+        SettingsPage.shared.isShown = false
         panel.setFrame(frame(), display: true)
         NSApp.activate()
         panel.makeKeyAndOrderFront(nil)
