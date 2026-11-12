@@ -14,12 +14,18 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     CODE_SIGN_STYLE: Automatic
 
+packages:
+  WorldTimeKit:
+    path: WorldTimeKit
+
 targets:
   Daybreak-iOS:
     type: application
     platform: iOS
     sources:
       - iOS
+    dependencies:
+      - package: WorldTimeKit
     info:
       path: iOS/Info.plist
       properties:
@@ -39,6 +45,8 @@ targets:
     platform: macOS
     sources:
       - macOS
+    dependencies:
+      - package: WorldTimeKit
     info:
       path: macOS/Info.plist
     settings:
