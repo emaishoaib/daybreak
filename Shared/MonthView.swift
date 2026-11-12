@@ -10,7 +10,7 @@ struct MonthView: View {
     var body: some View {
         let calendar = Calendar.autoupdatingCurrent
 
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 7), spacing: 2) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 7), spacing: 8) {
             ForEach(grid.weekdaySymbols.indices, id: \.self) { index in
                 Text(grid.weekdaySymbols[index])
                     .font(.caption.weight(.semibold))
@@ -40,7 +40,7 @@ private struct DayCell: View {
     var body: some View {
         Text("\(day.number)")
             .monospacedDigit()
-            .frame(width: 26, height: 26)
+            .frame(width: 28, height: 28)
             .foregroundStyle(isToday ? AnyShapeStyle(.white) : day.isInMonth ? AnyShapeStyle(.primary) : AnyShapeStyle(.tertiary))
             .background {
                 if isToday {
