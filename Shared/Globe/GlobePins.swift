@@ -8,6 +8,8 @@ struct GlobePins: View {
     private static let labelCharacterWidth: Double = 6.4
     private static let labelPadding: Double = 8
     private static let labelHeight: Double = 15
+    private static let ringWidth: CGFloat = 1.5
+    private static let placeColour = Color(red: 0.45, green: 1, blue: 0.4)
 
     let places: [Place]
     let here: Place?
@@ -31,7 +33,8 @@ struct GlobePins: View {
                 Circle()
                     .fill(pin.colour)
                     .frame(width: Self.dotSize, height: Self.dotSize)
-                    .shadow(color: pin.colour, radius: 3)
+                    .overlay(Circle().strokeBorder(.black.opacity(0.8), lineWidth: Self.ringWidth).padding(-Self.ringWidth))
+                    .shadow(color: pin.colour.opacity(0.8), radius: 4)
                     .position(x: pin.point.x, y: pin.point.y)
                 if let side = sides[index] {
                     let centre = LabelPlacement.centre(of: labels[index].size, beside: pin.point, on: side, dotRadius: Self.dotSize / 2, gap: Self.labelGap)
@@ -46,7 +49,7 @@ struct GlobePins: View {
     private func visiblePins(in size: CGSize) -> [(place: Place, point: LabelPlacement.Point, colour: Color)] {
         let radius = GlobeRenderer.radius(for: size, zoom: zoom)
         let centre = CGPoint(x: size.width / 2, y: size.height / 2)
-        let marked = (here.map { [($0, Color.blue)] } ?? []) + places.map { ($0, Color.yellow) }
+        let marked = (here.map { [($0, Color.blue)] } ?? []) + places.map { ($0, Self.placeColour) }
         return marked.compactMap { place, colour in
             let point = orientation.viewPoint(of: place.coordinate)
             guard point.z > Self.visibleDepth else { return nil }
