@@ -11,7 +11,8 @@ struct ZoneRow: View {
         HStack(spacing: 10) {
             DaylightIcon(daylight: place.daylight(at: date))
             VStack(alignment: .leading, spacing: 1) {
-                Text(place.name)
+                Text("\(place.name) \(Text("(\(place.timeZone.abbreviation(for: date) ?? place.timeZoneIdentifier))").foregroundStyle(.secondary))")
+                    .lineLimit(1)
                 Text(Self.offsetText(place.offset(from: home, at: date)))
                     .font(.caption)
                     .foregroundStyle(.secondary)
