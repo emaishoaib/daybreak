@@ -7,7 +7,7 @@ struct ListControls: View {
     let onAdd: () -> Void
 
     var body: some View {
-        ZStack {
+        HStack {
             if hiddenCount > 0 {
                 Button(action: onToggle) {
                     HStack(spacing: 4) {
@@ -22,17 +22,15 @@ struct ListControls: View {
                 }
                 .buttonStyle(.plain)
             }
-            HStack {
-                Spacer()
-                Button(action: onAdd) {
-                    Image(systemName: "plus")
-                        .font(.caption.weight(.semibold))
-                        .frame(width: 24, height: 24)
-                        .floatingOverGlobe(in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Add a place")
+            Spacer()
+            Button(action: onAdd) {
+                Image(systemName: "plus")
+                    .font(.caption.weight(.semibold))
+                    .frame(width: 24, height: 24)
+                    .floatingOverGlobe(in: Circle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Add a place")
         }
         .padding(.horizontal, 12)
         .padding(.top, 6)
