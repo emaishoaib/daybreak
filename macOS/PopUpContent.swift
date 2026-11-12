@@ -18,7 +18,6 @@ struct PopUpContent: View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
                 WorldPanel(zones: zones, moment: moment)
-                Divider()
                 FooterBar()
             }
             .fixedSize(horizontal: false, vertical: true)
