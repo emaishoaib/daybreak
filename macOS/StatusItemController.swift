@@ -42,6 +42,10 @@ final class StatusItemController: NSObject {
         updateImage()
         observeLayout()
         observeHere()
+        Here.shared.onTravel = { [weak self] left, arrived in
+            guard UserDefaults.standard.bool(forKey: SmartSwapSetting.key) else { return }
+            self?.zones.travel(leaving: left, arrivingIn: arrived.identifier)
+        }
         Task { await Here.shared.refresh() }
         for name in [UserDefaults.didChangeNotification, .NSCalendarDayChanged, .NSSystemTimeZoneDidChange] {
             NotificationCenter.default.addObserver(self, selector: #selector(scheduleImageUpdate), name: name, object: nil)

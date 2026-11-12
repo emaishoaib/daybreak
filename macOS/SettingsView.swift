@@ -41,6 +41,9 @@ struct SettingsView: View {
                     MenuBarLayoutPicker()
                     MenuBarPartToggles()
                 }
+                Section("Travel") {
+                    SmartSwapToggle()
+                }
                 Section {
                     VersionRow()
                     LabeledContent("Earth imagery", value: "NASA Earth Observatory")

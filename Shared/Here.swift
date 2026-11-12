@@ -15,6 +15,8 @@ final class Here {
     private(set) var city: String?
     private(set) var coordinate: Coordinate?
 
+    var onTravel: ((Place, TimeZone) -> Void)?
+
     private init() {
         let saved = UserDefaults.standard.dictionary(forKey: Self.savedKey)
         timeZone = (saved?["timeZone"] as? String).flatMap(TimeZone.init(identifier:)) ?? .autoupdatingCurrent
@@ -23,6 +25,15 @@ final class Here {
         if let latitude = saved?["latitude"] as? Double, let longitude = saved?["longitude"] as? Double {
             coordinate = Coordinate(latitude: latitude, longitude: longitude)
         }
+    }
+
+    var place: Place {
+        let fallbackName = timeZone.identifier.split(separator: "/").last.map { $0.replacingOccurrences(of: "_", with: " ") } ?? timeZone.identifier
+        return Place(
+            name: country ?? fallbackName,
+            timeZoneIdentifier: timeZone.identifier,
+            coordinate: coordinate ?? Coordinate(latitude: 0, longitude: Double(timeZone.secondsFromGMT()) / 240)
+        )
     }
 
     var calendar: Calendar {
@@ -69,6 +80,7 @@ final class Here {
     }
 
     private func update(timeZone: TimeZone, country: String?, city: String?, coordinate: Coordinate?) {
+        let left = place
         self.timeZone = timeZone
         self.country = country
         self.city = city
@@ -79,5 +91,8 @@ final class Here {
         saved["latitude"] = coordinate?.latitude
         saved["longitude"] = coordinate?.longitude
         UserDefaults.standard.set(saved, forKey: Self.savedKey)
+        if left.timeZoneIdentifier != timeZone.identifier {
+            onTravel?(left, timeZone)
+        }
     }
 }
