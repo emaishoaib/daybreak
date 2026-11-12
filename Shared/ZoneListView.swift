@@ -16,6 +16,11 @@ struct ZoneListView: View {
 
         TimelineView(.everyMinute) { context in
             List {
+                HereRow(date: moment.date(at: context.date))
+                    .frame(height: Self.rowHeight)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 6, bottom: 0, trailing: 6))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 ForEach(places) { place in
                     ZoneRow(place: place, date: moment.date(at: context.date))
                         .frame(height: Self.rowHeight)
@@ -34,7 +39,7 @@ struct ZoneListView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .frame(height: CGFloat(min(places.count, Self.maximumVisibleRows)) * Self.rowHeight)
+            .frame(height: CGFloat(min(places.count, Self.maximumVisibleRows) + 1) * Self.rowHeight)
         }
     }
 }

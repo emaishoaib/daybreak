@@ -29,23 +29,21 @@ struct WorldPanel: View {
                         .padding(.bottom, 8)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                HereHeading(
-                    moment: moment,
-                    canExpand: zones.places.count > ZoneListView.collapsedCount,
-                    isExpanded: layout.isListExpanded
-                ) {
-                    withAnimation(.snappy) { layout.isListExpanded.toggle() }
-                } onAdd: {
-                    isSearching = true
-                }
-                if !zones.places.isEmpty {
-                    ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded) { place in
-                        flight = GlobeFlight(place: place)
-                    }
-                        .padding(.bottom, 8)
+                ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded) { place in
+                    flight = GlobeFlight(place: place)
                 }
                 Globe(places: zones.places, moment: moment, flight: flight)
                     .frame(height: Self.globeHeight)
+                    .overlay(alignment: .top) {
+                        ListControls(
+                            hiddenCount: max(0, zones.places.count - ZoneListView.collapsedCount),
+                            isExpanded: layout.isListExpanded
+                        ) {
+                            withAnimation(.snappy) { layout.isListExpanded.toggle() }
+                        } onAdd: {
+                            isSearching = true
+                        }
+                    }
                 Divider()
                 TimeScrubber(moment: moment)
             }
