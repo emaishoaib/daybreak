@@ -9,7 +9,6 @@ final class PopUpLayout {
     static let estimatedHeight: CGFloat = 790
     private static let listExpandedKey = "listExpanded"
 
-    var isMonthOpen = true
     var contentHeight = estimatedHeight
 
     var isListExpanded = UserDefaults.standard.bool(forKey: listExpandedKey) {

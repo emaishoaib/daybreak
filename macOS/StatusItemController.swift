@@ -90,7 +90,6 @@ final class StatusItemController: NSObject {
 
     private func show() {
         SettingsPage.shared.isShown = false
-        PopUpLayout.shared.isMonthOpen = true
         moment.returnToNow()
         panel.setFrame(frame(), display: true)
         NSApp.activate()

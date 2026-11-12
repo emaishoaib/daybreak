@@ -1,7 +1,7 @@
 import SwiftUI
 import WorldTimeKit
 
-struct MonthDropDown: View {
+struct MonthCard: View {
     let moment: ChosenMoment
 
     @State private var shownMonth: Date?
