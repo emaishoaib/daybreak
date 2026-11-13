@@ -54,13 +54,14 @@ final class StatusItemController: NSObject {
         }
         Task { await Here.shared.refresh() }
         for name in [UserDefaults.didChangeNotification, .NSCalendarDayChanged, .NSSystemTimeZoneDidChange] {
-            NotificationCenter.default.addObserver(self, selector: #selector(scheduleImageUpdate), name: name, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(scheduleRefresh), name: name, object: nil)
         }
     }
 
-    @objc private func scheduleImageUpdate() {
+    @objc private func scheduleRefresh() {
         Task { @MainActor [weak self] in
             self?.updateImage()
+            self?.resize()
         }
     }
 
@@ -101,7 +102,7 @@ final class StatusItemController: NSObject {
     private func frame() -> NSRect {
         let icon = iconFrame
         let width = PopUpContent.width
-        var x = icon.midX - width / 2
+        var x = PopUpAlignment.current.x(width: width, under: icon)
         var height = PopUpContent.height
         if let screen = statusItem.button?.window?.screen?.visibleFrame {
             x = min(max(x, screen.minX + Self.screenMargin), screen.maxX - width - Self.screenMargin)

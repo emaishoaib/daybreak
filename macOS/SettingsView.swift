@@ -44,6 +44,7 @@ struct SettingsView: View {
                 Section("Menu bar") {
                     MenuBarLayoutPicker()
                     MenuBarPartToggles()
+                    PopUpAlignmentPicker()
                 }
                 Section("Travel") {
                     SmartSwapToggle()
@@ -69,6 +70,20 @@ private struct MenuBarLayoutPicker: View {
     var body: some View {
         Picker("Layout", selection: $layout) {
             ForEach(MenuBarLayout.allCases, id: \.self) { option in
+                Text(option.name)
+                    .tag(option)
+            }
+        }
+        .pickerStyle(.radioGroup)
+    }
+}
+
+private struct PopUpAlignmentPicker: View {
+    @AppStorage(PopUpAlignment.key) private var alignment = PopUpAlignment.center
+
+    var body: some View {
+        Picker("Pop-up", selection: $alignment) {
+            ForEach(PopUpAlignment.allCases, id: \.self) { option in
                 Text(option.name)
                     .tag(option)
             }
