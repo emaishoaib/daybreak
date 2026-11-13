@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <clipPath id="earth">
+      <circle cx="512" cy="512" r="322.6"/>
+    </clipPath>
+  </defs>
+  <circle cx="512" cy="512" r="322.6" fill="#8CC0FF"/>
+  <g clip-path="url(#earth)">
+    <circle cx="473.6" cy="550.4" r="322.6" fill="#0A1122"/>
+    <circle cx="343.0" cy="419.8" r="11.5" fill="#FFC861"/>
+    <circle cx="389.1" cy="450.6" r="8.4" fill="#FFC861"/>
+    <circle cx="297.0" cy="527.4" r="9.2" fill="#FFC861"/>
+    <circle cx="450.6" cy="404.5" r="9.2" fill="#FFC861"/>
+    <circle cx="481.3" cy="512.0" r="13.8" fill="#FFC861"/>
+    <circle cx="512.0" cy="542.7" r="8.4" fill="#FFC861"/>
+    <circle cx="404.5" cy="604.2" r="10.0" fill="#FFC861"/>
+    <circle cx="358.4" cy="696.3" r="10.8" fill="#FFC861"/>
+    <circle cx="542.7" cy="665.6" r="9.2" fill="#FFC861"/>
+    <circle cx="604.2" cy="496.6" r="7.7" fill="#FFC861"/>
+    <circle cx="266.2" cy="634.9" r="7.7" fill="#FFC861"/>
+    <circle cx="465.9" cy="757.8" r="8.4" fill="#FFC861"/>
+  </g>
+</svg>
