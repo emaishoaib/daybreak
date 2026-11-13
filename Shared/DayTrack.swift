@@ -9,6 +9,7 @@ struct DayTrack: View {
 
     let dayStart: Date
     let minutes: Double
+    let nowMinutes: Double?
     let coordinate: Coordinate
     let onChange: (Double) -> Void
 
@@ -20,6 +21,10 @@ struct DayTrack: View {
                     ForEach(0...24, id: \.self) { hour in
                         HourTick(isLong: hour % 6 == 0, isDaylight: isDaylight(atHour: hour))
                             .offset(x: Self.handleSize / 2 + travel * Double(hour) / 24 - HourTick.width / 2)
+                    }
+                    if let nowMinutes {
+                        NowMark(height: Self.handleSize)
+                            .offset(x: Self.handleSize / 2 + travel * nowMinutes / Self.minutesPerDay - NowMark.width / 2)
                     }
                     DayHandle(isDay: isDaylight(atMinute: minutes))
                         .frame(width: Self.handleSize, height: Self.handleSize)
@@ -70,6 +75,19 @@ private struct HourTick: View {
         Capsule()
             .fill(isDaylight ? Color(white: 0.85) : Color(white: 0.32))
             .frame(width: Self.width, height: isLong ? 16 : 8)
+    }
+}
+
+private struct NowMark: View {
+    static let width: CGFloat = 2
+
+    let height: CGFloat
+
+    var body: some View {
+        Capsule()
+            .fill(.blue)
+            .frame(width: Self.width, height: height)
+            .accessibilityHidden(true)
     }
 }
 

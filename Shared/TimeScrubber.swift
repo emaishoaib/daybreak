@@ -31,6 +31,7 @@ struct TimeScrubber<Trailing: View>: View {
                 DayTrack(
                     dayStart: here.calendar.startOfDay(for: date),
                     minutes: moment.minutesIntoDay(at: context.date),
+                    nowMinutes: nowMinutes(showing: date, at: context.date),
                     coordinate: coordinate
                 ) { minutes in
                     moment.choose(minutesIntoDay: minutes, at: context.date)
@@ -39,6 +40,11 @@ struct TimeScrubber<Trailing: View>: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
+    }
+
+    private func nowMinutes(showing date: Date, at now: Date) -> Double? {
+        guard here.calendar.isDate(date, inSameDayAs: now) else { return nil }
+        return now.timeIntervalSince(here.calendar.startOfDay(for: now)) / 60
     }
 
     private var coordinate: Coordinate {
