@@ -10,6 +10,7 @@ struct PopUpContent: View {
 
     let zones: ZoneList
     let moment: ChosenMoment
+    var onCheckForUpdates: () -> Void = {}
 
     @State private var settings = SettingsPage.shared
     @State private var layout = PopUpLayout.shared
@@ -23,7 +24,7 @@ struct PopUpContent: View {
             .fixedSize(horizontal: false, vertical: true)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { layout.contentHeight = $0 }
             if settings.isShown {
-                SettingsView()
+                SettingsView(onCheckForUpdates: onCheckForUpdates)
             }
         }
         .frame(width: Self.width)

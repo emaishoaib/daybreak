@@ -22,6 +22,10 @@ final class StatusItemController: NSObject {
 
         let content = NSHostingController(rootView: PopUpContent(zones: zones, moment: moment))
         content.sizingOptions = []
+        content.rootView.onCheckForUpdates = { [weak self] in
+            self?.dismiss()
+            AppUpdater.shared.check()
+        }
         let container = NSView()
         content.view.frame = container.bounds
         content.view.autoresizingMask = [.width, .height]

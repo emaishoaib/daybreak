@@ -20,6 +20,9 @@ settings:
 packages:
   WorldTimeKit:
     path: WorldTimeKit
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.1
 
 targets:
   Daybreak-iOS:
@@ -56,12 +59,17 @@ targets:
       - Icon/AppIcon.icon
     dependencies:
       - package: WorldTimeKit
+      - package: Sparkle
     entitlements:
       path: macOS/Daybreak.entitlements
       properties:
         com.apple.security.personal-information.location: true
     info:
       path: macOS/Info.plist
+      properties:
+        SUFeedURL: https://$(DAYBREAK_UPDATES_HOST)/daybreak/appcast.xml
+        SUPublicEDKey: $(DAYBREAK_SPARKLE_PUBLIC_KEY)
+        SUEnableAutomaticChecks: true
     settings:
       base:
         PRODUCT_NAME: Daybreak

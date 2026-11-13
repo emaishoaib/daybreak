@@ -18,5 +18,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = StatusItemController()
+        AppUpdater.shared.start()
     }
 }

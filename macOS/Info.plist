@@ -18,5 +18,11 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://$(DAYBREAK_UPDATES_HOST)/daybreak/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>$(DAYBREAK_SPARKLE_PUBLIC_KEY)</string>
 </dict>
 </plist>
