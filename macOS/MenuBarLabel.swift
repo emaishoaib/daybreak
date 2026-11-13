@@ -12,7 +12,7 @@ enum MenuBarLabel {
         let showsDate = layout == .calendarPage || !parts.isEmpty
         guard showsDate || !places.isEmpty else { return fallback }
         let content = HStack(spacing: placeSpacing) {
-            ForEach(places) { place in
+            ForEach(places.reversed()) { place in
                 PlaceLabel(place: place, date: date)
             }
             if showsDate {
