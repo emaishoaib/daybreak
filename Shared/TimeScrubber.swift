@@ -1,10 +1,16 @@
 import SwiftUI
 import WorldTimeKit
 
-struct TimeScrubber: View {
+struct TimeScrubber<Trailing: View>: View {
     let moment: ChosenMoment
+    let trailing: Trailing
 
     @State private var here = Here.shared
+
+    init(moment: ChosenMoment, @ViewBuilder trailing: () -> Trailing) {
+        self.moment = moment
+        self.trailing = trailing()
+    }
 
     var body: some View {
         TimelineView(.everyMinute) { context in
@@ -13,13 +19,14 @@ struct TimeScrubber: View {
                 ZStack {
                     Text(date.formatted(here.style(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())))
                         .monospacedDigit()
-                    HStack {
+                    HStack(spacing: 8) {
                         Spacer()
                         Button("Now") {
                             moment.glideToNow()
                         }
                         .opacity(moment.isLive ? 0 : 1)
                         .allowsHitTesting(!moment.isLive)
+                        trailing
                     }
                 }
                 DayTrack(

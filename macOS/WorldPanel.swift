@@ -29,26 +29,31 @@ struct WorldPanel: View {
                         .padding(.bottom, 8)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                TimeScrubber(moment: moment)
-                    .padding(.top, -6)
+                TimeScrubber(moment: moment) {
+                    AddPlaceButton {
+                        isSearching = true
+                    }
+                }
+                .padding(.top, -6)
                 ZoneListView(zones: zones, moment: moment, isExpanded: layout.isListExpanded) { place in
                     flight = GlobeFlight(place: place)
                 }
+                if hiddenCount > 0 {
+                    ShowMoreButton(hiddenCount: hiddenCount, isExpanded: layout.isListExpanded) {
+                        withAnimation(.snappy) { layout.isListExpanded.toggle() }
+                    }
+                    .padding(.top, 4)
+                    .padding(.bottom, 8)
+                }
                 Globe(places: zones.places, moment: moment, flight: flight)
                     .frame(height: Self.globeHeight)
-                    .overlay(alignment: .top) {
-                        ListControls(
-                            hiddenCount: max(0, zones.places.count - ZoneListView.collapsedCount),
-                            isExpanded: layout.isListExpanded
-                        ) {
-                            withAnimation(.snappy) { layout.isListExpanded.toggle() }
-                        } onAdd: {
-                            isSearching = true
-                        }
-                    }
                     .padding(.bottom, 8)
             }
         }
+    }
+
+    private var hiddenCount: Int {
+        max(0, zones.places.count - ZoneListView.collapsedCount)
     }
 
     private var header: some View {
