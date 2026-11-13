@@ -6,9 +6,13 @@ import WorldTimeKit
 @Observable
 final class CitySearch: NSObject {
     private(set) var results: [MKLocalSearchCompletion] = []
+    private(set) var timeZones: [Place] = []
 
     var query = "" {
-        didSet { completer.queryFragment = query }
+        didSet {
+            completer.queryFragment = query
+            timeZones = TimeZoneSearch.places(matching: query)
+        }
     }
 
     private let completer = MKLocalSearchCompleter()

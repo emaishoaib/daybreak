@@ -58,6 +58,27 @@ struct PlaceTests {
         #expect(tokyo.id == "Asia/Tokyo/Tokyo")
     }
 
+    @Test func aTimeZoneTakesItsDaylightFromItsOffsetAtTheEquator() {
+        let utc = Place(name: "Coordinated Universal Time", timeZoneIdentifier: "UTC", coordinate: nil)
+        #expect(utc.daylight(at: time("2026-11-12T12:00:00Z")) == .day)
+        #expect(utc.daylight(at: time("2026-11-12T00:00:00Z")) == .night)
+    }
+
+    @Test func aTimeZoneIsShortenedToItsAbbreviation() {
+        let utc = Place(name: "Coordinated Universal Time", timeZoneIdentifier: "UTC", coordinate: nil)
+        #expect(utc.shortCode == utc.timeZone.abbreviation())
+    }
+
+    @Test func aPlaceSavedWithACoordinateStillLoads() throws {
+        let saved = Data(#"{"name":"London","timeZoneIdentifier":"Europe/London","coordinate":{"latitude":51.51,"longitude":-0.13}}"#.utf8)
+        #expect(try JSONDecoder().decode(Place.self, from: saved) == londonPlace)
+    }
+
+    @Test func aTimeZoneSurvivesSavingAndLoading() throws {
+        let utc = Place(name: "Coordinated Universal Time", timeZoneIdentifier: "UTC", coordinate: nil)
+        #expect(try JSONDecoder().decode(Place.self, from: JSONEncoder().encode(utc)) == utc)
+    }
+
     func place(named name: String) -> Place {
         Place(name: name, timeZoneIdentifier: "UTC", coordinate: Coordinate(latitude: 0, longitude: 0))
     }

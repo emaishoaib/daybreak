@@ -10,21 +10,36 @@ struct CitySearchView: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            TextField("Search for a city or country", text: $search.query)
+            TextField("Search for a city, country or time zone", text: $search.query)
                 .textFieldStyle(.roundedBorder)
                 .focused($isFocused)
                 .padding(.horizontal, 16)
-            List(search.results, id: \.self) { completion in
-                Button {
-                    Task {
-                        guard let place = await search.place(for: completion) else { return }
-                        onPick(place)
+            List {
+                if !search.timeZones.isEmpty {
+                    Section("Time zones") {
+                        ForEach(search.timeZones) { place in
+                            Button {
+                                onPick(place)
+                            } label: {
+                                TimeZoneResult(place: place)
+                            }
+                            .buttonStyle(.plain)
+                            .listRowBackground(Color.clear)
+                        }
                     }
-                } label: {
-                    CityResult(completion: completion)
                 }
-                .buttonStyle(.plain)
-                .listRowBackground(Color.clear)
+                ForEach(search.results, id: \.self) { completion in
+                    Button {
+                        Task {
+                            guard let place = await search.place(for: completion) else { return }
+                            onPick(place)
+                        }
+                    } label: {
+                        CityResult(completion: completion)
+                    }
+                    .buttonStyle(.plain)
+                    .listRowBackground(Color.clear)
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
@@ -40,6 +55,21 @@ private struct CityResult: View {
         VStack(alignment: .leading, spacing: 1) {
             Text(completion.title)
             Text(completion.subtitle)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+    }
+}
+
+private struct TimeZoneResult: View {
+    let place: Place
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(place.name)
+            Text(place.shortCode)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

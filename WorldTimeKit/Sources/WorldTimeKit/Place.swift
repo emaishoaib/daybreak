@@ -5,9 +5,9 @@ public struct Place: Codable, Hashable, Sendable, Identifiable {
 
     public let name: String
     public let timeZoneIdentifier: String
-    public let coordinate: Coordinate
+    public let coordinate: Coordinate?
 
-    public init(name: String, timeZoneIdentifier: String, coordinate: Coordinate) {
+    public init(name: String, timeZoneIdentifier: String, coordinate: Coordinate?) {
         self.name = name
         self.timeZoneIdentifier = timeZoneIdentifier
         self.coordinate = coordinate
@@ -17,7 +17,12 @@ public struct Place: Codable, Hashable, Sendable, Identifiable {
         "\(timeZoneIdentifier)/\(name)"
     }
 
+    public var isTimeZone: Bool {
+        coordinate == nil
+    }
+
     public var shortCode: String {
+        guard !isTimeZone else { return timeZone.abbreviation() ?? timeZoneIdentifier }
         let name = name.split(separator: ",").first.map(String.init) ?? name
         let words = name.split(separator: " ").filter { $0.first?.isUppercase == true }
         guard words.count > 1 else {
@@ -39,7 +44,11 @@ public struct Place: Codable, Hashable, Sendable, Identifiable {
     }
 
     public func daylight(at date: Date) -> Daylight {
-        Daylight(sunElevation: Sun.elevation(at: coordinate, on: date))
+        Daylight(sunElevation: Sun.elevation(at: coordinate ?? offsetCoordinate(at: date), on: date))
+    }
+
+    private func offsetCoordinate(at date: Date) -> Coordinate {
+        Coordinate(latitude: 0, longitude: Double(timeZone.secondsFromGMT(for: date)) / 240)
     }
 
     private static func dayNumber(of date: Date, in timeZone: TimeZone) -> Int {

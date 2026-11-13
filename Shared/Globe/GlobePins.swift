@@ -51,7 +51,8 @@ struct GlobePins: View {
         let centre = CGPoint(x: size.width / 2, y: size.height / 2)
         let marked = (here.map { [($0, Color.blue)] } ?? []) + places.map { ($0, Self.placeColour) }
         return marked.compactMap { place, colour in
-            let point = orientation.viewPoint(of: place.coordinate)
+            guard let coordinate = place.coordinate else { return nil }
+            let point = orientation.viewPoint(of: coordinate)
             guard point.z > Self.visibleDepth else { return nil }
             return (place, LabelPlacement.Point(x: centre.x + point.x * radius, y: centre.y - point.y * radius), colour)
         }

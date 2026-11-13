@@ -37,8 +37,8 @@ struct Globe: View {
             }
         }
         .onChange(of: flight) {
-            guard let flight else { return }
-            move(to: camera.focused(on: flight.place.coordinate), seconds: GlobeMotion.flightSeconds)
+            guard let coordinate = flight?.place.coordinate else { return }
+            move(to: camera.focused(on: coordinate), seconds: GlobeMotion.flightSeconds)
         }
     }
 
