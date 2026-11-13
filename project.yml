@@ -7,6 +7,9 @@ options:
     macOS: "27.0"
   createIntermediateGroups: true
 
+configFiles:
+  Release: Config/Release.xcconfig
+
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -64,6 +67,7 @@ targets:
         PRODUCT_NAME: Daybreak
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         PRODUCT_BUNDLE_IDENTIFIER: com.mashoaib.daybreak
+        ENABLE_HARDENED_RUNTIME: YES
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Daybreak
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities

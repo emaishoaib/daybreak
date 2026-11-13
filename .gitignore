@@ -6,3 +6,4 @@ xcuserdata/
 Daybreak.xcodeproj/
 .build/
 .swiftpm/
+Config/Release.xcconfig
