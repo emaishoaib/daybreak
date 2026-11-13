@@ -30,9 +30,7 @@ struct ZoneRow: View {
             if place.dayDifference(from: home, at: date) != 0 {
                 DayChip(text: date.formatted(style(.dateTime.weekday(.abbreviated).day())))
             }
-            Text(date.formatted(style(.dateTime.hour().minute())))
-                .font(.title3)
-                .monospacedDigit()
+            RowTime(text: date.formatted(style(.dateTime.hour().minute())))
         }
         .padding(.vertical, 2)
     }
@@ -79,15 +77,46 @@ private struct DaylightIcon: View {
     }
 }
 
-private struct DayChip: View {
+private struct RowTime: View {
+    private static let widestSamples = [10, 22].map { hour in
+        widestSample(Date(timeIntervalSince1970: Double(hour * 3600 + 58 * 60)), .dateTime.hour().minute())
+    }
+
     let text: String
 
     var body: some View {
-        Text(text)
-            .font(.caption)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .foregroundStyle(.orange)
-            .background(.orange.opacity(0.18), in: RoundedRectangle(cornerRadius: 4))
+        ZStack(alignment: .trailing) {
+            ForEach(Self.widestSamples, id: \.self) { Text($0).hidden() }
+            Text(text)
+        }
+        .font(.title3)
+        .monospacedDigit()
     }
+}
+
+private struct DayChip: View {
+    private static let widestSamples = (21...27).map { day in
+        widestSample(Date(timeIntervalSince1970: Double(day * 86_400)), .dateTime.weekday(.abbreviated).day())
+    }
+
+    let text: String
+
+    var body: some View {
+        ZStack {
+            ForEach(Self.widestSamples, id: \.self) { Text($0).hidden() }
+            Text(text)
+        }
+        .font(.caption)
+        .monospacedDigit()
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .foregroundStyle(.orange)
+        .background(.orange.opacity(0.18), in: RoundedRectangle(cornerRadius: 4))
+    }
+}
+
+private func widestSample(_ date: Date, _ style: Date.FormatStyle) -> String {
+    var style = style
+    style.timeZone = .gmt
+    return date.formatted(style)
 }
