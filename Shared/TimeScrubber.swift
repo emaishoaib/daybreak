@@ -17,15 +17,14 @@ struct TimeScrubber<Trailing: View>: View {
             let date = moment.date(at: context.date)
             VStack(spacing: 6) {
                 ZStack {
-                    Text(date.formatted(here.style(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())))
-                        .monospacedDigit()
-                    HStack(spacing: 8) {
+                    ReturnPill(
+                        text: date.formatted(here.style(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())),
+                        isAway: !moment.isLive
+                    ) {
+                        moment.glideToNow()
+                    }
+                    HStack {
                         Spacer()
-                        Button("Now") {
-                            moment.glideToNow()
-                        }
-                        .opacity(moment.isLive ? 0 : 1)
-                        .allowsHitTesting(!moment.isLive)
                         trailing
                     }
                 }
@@ -44,5 +43,33 @@ struct TimeScrubber<Trailing: View>: View {
 
     private var coordinate: Coordinate {
         here.coordinate ?? Coordinate(latitude: 0, longitude: Double(here.timeZone.secondsFromGMT()) / 240)
+    }
+}
+
+private struct ReturnPill: View {
+    let text: String
+    let isAway: Bool
+    let onReturn: () -> Void
+
+    var body: some View {
+        Button(action: onReturn) {
+            HStack(spacing: 5) {
+                if isAway {
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.caption.weight(.semibold))
+                        .transition(.scale.combined(with: .opacity))
+                }
+                Text(text)
+                    .monospacedDigit()
+            }
+            .padding(.horizontal, isAway ? 10 : 0)
+            .padding(.vertical, 3)
+            .background(.blue.opacity(isAway ? 0.25 : 0), in: Capsule())
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .allowsHitTesting(isAway)
+        .accessibilityHint(isAway ? "Returns to now" : "")
+        .animation(.snappy, value: isAway)
     }
 }
