@@ -2,18 +2,28 @@ import MapKit
 import SwiftUI
 import WorldTimeKit
 
-struct CitySearchView: View {
+struct CitySearchView<Trailing: View>: View {
     let onPick: (Place) -> Void
+    let trailing: Trailing
 
     @State private var search = CitySearch()
     @FocusState private var isFocused: Bool
 
+    init(onPick: @escaping (Place) -> Void, @ViewBuilder trailing: () -> Trailing) {
+        self.onPick = onPick
+        self.trailing = trailing()
+    }
+
     var body: some View {
         VStack(spacing: 8) {
-            TextField("Search for a city, country or time zone", text: $search.query)
-                .textFieldStyle(.roundedBorder)
-                .focused($isFocused)
-                .padding(.horizontal, 16)
+            HStack(spacing: 8) {
+                TextField("Search for a city, country or time zone", text: $search.query)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($isFocused)
+                trailing
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 10)
             List {
                 if !search.timeZones.isEmpty {
                     Section("Time zones") {

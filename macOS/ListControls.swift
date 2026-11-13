@@ -22,17 +22,28 @@ struct ShowMoreButton: View {
 }
 
 struct AddPlaceButton: View {
-    let onAdd: () -> Void
+    static let size: CGFloat = 24
+
+    let isOpen: Bool
+    let onToggle: () -> Void
 
     var body: some View {
-        Button(action: onAdd) {
+        Button(action: onToggle) {
             Image(systemName: "plus")
                 .font(.caption.weight(.semibold))
-                .frame(width: 24, height: 24)
+                .rotationEffect(.degrees(isOpen ? 45 : 0))
+                .frame(width: Self.size, height: Self.size)
                 .controlChip(in: Circle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Add a place")
+        .accessibilityLabel(isOpen ? "Close search" : "Add a place")
+    }
+}
+
+struct AddPlaceButtonSpace: View {
+    var body: some View {
+        Color.clear
+            .frame(width: AddPlaceButton.size, height: AddPlaceButton.size)
     }
 }
 
