@@ -11,6 +11,7 @@ final class StatusItemController: NSObject {
 
     private let zones = ZoneList()
     private let moment = ChosenMoment()
+    private let layout = PopUpLayout.shared
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let panel = PopUpPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
     private var content: NSHostingController<PopUpContent>?
@@ -136,6 +137,18 @@ final class StatusItemController: NSObject {
     private func resize() {
         let frame = frame()
         guard panel.isVisible, panel.frame != frame else { return }
+        guard frame.height != layout.shownHeight else { return move(to: frame) }
+        if frame.height > panel.frame.height {
+            panel.setFrame(frame, display: true)
+        }
+        withAnimation(PopUpContent.resizeAnimation, completionCriteria: .removed) {
+            layout.shownHeight = frame.height
+        } completion: { [weak self] in
+            self?.settle(at: frame)
+        }
+    }
+
+    private func move(to frame: NSRect) {
         NSAnimationContext.runAnimationGroup { context in
             context.duration = Self.resizeDuration
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
@@ -143,11 +156,19 @@ final class StatusItemController: NSObject {
         }
     }
 
+    private func settle(at frame: NSRect) {
+        guard panel.isVisible, layout.shownHeight == frame.height else { return }
+        panel.setFrame(frame, display: true)
+        panel.invalidateShadow()
+    }
+
     private func show() {
         SettingsPage.shared.isShown = false
         moment.returnToNow()
         Task { await Here.shared.refresh() }
-        panel.setFrame(frame(), display: true)
+        let frame = frame()
+        layout.shownHeight = frame.height
+        panel.setFrame(frame, display: true)
         NSApp.activate()
         panel.makeKeyAndOrderFront(nil)
 

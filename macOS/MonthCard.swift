@@ -15,19 +15,19 @@ struct MonthCard: View {
             VStack(spacing: 8) {
                 HStack {
                     MonthArrow(symbol: "chevron.left", label: "Previous month") {
-                        shownMonth = calendar.date(byAdding: .month, value: -1, to: grid.start)
+                        show(calendar.date(byAdding: .month, value: -1, to: grid.start))
                     }
                     Spacer()
                     Text(grid.start.formatted(Here.shared.style(.dateTime.month(.wide).year())))
                         .font(.subheadline.weight(.semibold))
                     Spacer()
                     MonthArrow(symbol: "chevron.right", label: "Next month") {
-                        shownMonth = calendar.date(byAdding: .month, value: 1, to: grid.start)
+                        show(calendar.date(byAdding: .month, value: 1, to: grid.start))
                     }
                 }
                 MonthView(grid: grid, selected: date, today: context.date) { day in
                     moment.choose(day: day, at: context.date)
-                    shownMonth = nil
+                    show(nil)
                 }
             }
             .padding(10)
@@ -35,6 +35,12 @@ struct MonthCard: View {
         }
         .onChange(of: moment.state) {
             shownMonth = nil
+        }
+    }
+
+    private func show(_ month: Date?) {
+        withAnimation(PopUpContent.resizeAnimation) {
+            shownMonth = month
         }
     }
 }

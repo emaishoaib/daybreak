@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PopUpContent: View {
     static let width: CGFloat = 360
+    static let resizeAnimation = Animation.snappy
 
     @MainActor
     static var height: CGFloat {
@@ -27,9 +28,9 @@ struct PopUpContent: View {
                 SettingsView(onCheckForUpdates: onCheckForUpdates)
             }
         }
-        .frame(width: Self.width)
-        .frame(maxHeight: .infinity, alignment: .top)
+        .frame(width: Self.width, height: layout.shownHeight, alignment: .top)
         .background(Palette.night)
         .clipShape(RoundedRectangle(cornerRadius: 14))
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 }

@@ -11,6 +11,7 @@ final class PopUpLayout {
     private static let monthOpenKey = "monthOpen"
 
     var contentHeight = estimatedHeight
+    var shownHeight = estimatedHeight
 
     var isMonthOpen = UserDefaults.standard.object(forKey: monthOpenKey) as? Bool ?? true {
         didSet { UserDefaults.standard.set(isMonthOpen, forKey: Self.monthOpenKey) }
