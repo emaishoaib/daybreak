@@ -59,7 +59,7 @@ final class StatusItemController: NSObject {
         }
     }
 
-    @objc private func scheduleRefresh() {
+    @objc nonisolated private func scheduleRefresh() {
         Task { @MainActor [weak self] in
             self?.updateImage()
             self?.resize()
