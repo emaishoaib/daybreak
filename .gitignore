@@ -9,3 +9,5 @@ Daybreak.xcodeproj/
 Config/Release.xcconfig
 releases/
 .wrangler/
+PLAN.md
+RELEASING.md
