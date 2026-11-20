@@ -45,10 +45,11 @@ struct CitySearchView<Trailing: View>: View {
                             onPick(place)
                         }
                     } label: {
-                        CityResult(completion: completion)
+                        CityResult(completion: completion, timeZone: search.foundPlace(for: completion)?.timeZone)
                     }
                     .buttonStyle(.plain)
                     .listRowBackground(Color.clear)
+                    .task { await search.lookUpAfterPause(completion) }
                 }
             }
             .listStyle(.plain)
@@ -60,13 +61,12 @@ struct CitySearchView<Trailing: View>: View {
 
 private struct CityResult: View {
     let completion: MKLocalSearchCompletion
+    let timeZone: TimeZone?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(completion.title)
-            Text(completion.subtitle)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            ResultSubtitle(detail: completion.subtitle, timeZone: timeZone)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
