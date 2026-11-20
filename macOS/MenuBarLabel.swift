@@ -70,12 +70,16 @@ private struct PlaceLabel: View {
 
     var body: some View {
         VStack(spacing: -2.5) {
-            Text(place.shortCode)
+            Text(title)
                 .font(.system(size: 11.5, weight: .semibold))
             Text(date.formatted(style))
                 .font(.system(size: 11.5))
                 .monospacedDigit()
         }
+    }
+
+    private var title: String {
+        place.isTimeZone ? place.shortCode : place.name
     }
 
     private var style: Date.FormatStyle {
