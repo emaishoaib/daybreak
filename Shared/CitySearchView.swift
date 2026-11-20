@@ -79,11 +79,29 @@ private struct TimeZoneResult: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(place.name)
-            Text(place.shortCode)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            ResultSubtitle(detail: place.shortCode, timeZone: place.timeZone)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
+    }
+}
+
+private struct ResultSubtitle: View {
+    let detail: String
+    let timeZone: TimeZone?
+
+    var body: some View {
+        TimelineView(.everyMinute) { context in
+            Text(text(at: context.date))
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+
+    private func text(at date: Date) -> String {
+        guard let timeZone else { return detail }
+        var style = Date.FormatStyle.dateTime.hour().minute()
+        style.timeZone = timeZone
+        return [detail, date.formatted(style)].filter { !$0.isEmpty }.joined(separator: " · ")
     }
 }
