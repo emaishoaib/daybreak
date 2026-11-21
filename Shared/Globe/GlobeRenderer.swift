@@ -13,7 +13,7 @@ struct GlobeUniforms {
 @Observable
 final class GlobeRenderer {
     static let shared = GlobeRenderer()
-    static let radiusFraction = 0.9
+    nonisolated static let radiusFraction = 0.9
 
     struct Request: Equatable {
         let width: Int
@@ -23,7 +23,12 @@ final class GlobeRenderer {
         let sun: Coordinate
     }
 
-    private(set) var image: CGImage?
+    enum Picture {
+        case waiting(since: Date)
+        case ready(CGImage)
+    }
+
+    private(set) var picture = Picture.waiting(since: .now)
     @ObservationIgnored private var resources: GlobeResources?
     @ObservationIgnored private var loading: Task<Void, Never>?
     @ObservationIgnored private var target: MTLTexture?
@@ -31,7 +36,7 @@ final class GlobeRenderer {
     @ObservationIgnored private var drawing: Request?
     @ObservationIgnored private var shown: Request?
 
-    static func radius(for size: CGSize, zoom: Double) -> Double {
+    nonisolated static func radius(for size: CGSize, zoom: Double) -> Double {
         min(size.width, size.height) / 2 * radiusFraction * zoom
     }
 
@@ -45,6 +50,12 @@ final class GlobeRenderer {
 
     func draw(_ request: Request) {
         wanted = request
+        drawNext()
+    }
+
+    func forget() {
+        picture = .waiting(since: .now)
+        shown = nil
         drawNext()
     }
 
@@ -65,8 +76,8 @@ final class GlobeRenderer {
     }
 
     private func finishDrawing() {
-        if let target {
-            image = Self.image(from: target)
+        if let target, let image = Self.image(from: target) {
+            picture = .ready(image)
         }
         shown = drawing
         drawing = nil

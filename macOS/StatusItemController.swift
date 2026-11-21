@@ -8,6 +8,7 @@ final class StatusItemController: NSObject {
     private static let screenMargin: CGFloat = 8
     private static let reopenGuard: TimeInterval = 0.3
     private static let resizeDuration: TimeInterval = 0.3
+    private static let globeGoesStaleAfter: TimeInterval = 5 * 60
 
     private let zones = ZoneList()
     private let moment = ChosenMoment()
@@ -165,6 +166,9 @@ final class StatusItemController: NSObject {
     private func show() {
         SettingsPage.shared.isShown = false
         moment.returnToNow()
+        if Date.now.timeIntervalSince(hiddenAt) > Self.globeGoesStaleAfter {
+            GlobeRenderer.shared.forget()
+        }
         Task { await Here.shared.refresh() }
         let frame = frame()
         layout.shownHeight = frame.height
