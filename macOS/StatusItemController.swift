@@ -14,7 +14,7 @@ final class StatusItemController: NSObject {
     private let moment = ChosenMoment()
     private let layout = PopUpLayout.shared
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-    private let panel = PopUpPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
+    private let panel = PopUpPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
     private var content: NSHostingController<PopUpContent>?
     private var clickMonitor: Any?
     private var hiddenAt = Date.distantPast
@@ -43,6 +43,7 @@ final class StatusItemController: NSObject {
         panel.onCancel = { [weak self] in
             self?.dismiss()
         }
+        warmUp()
 
         statusItem.expandedInterfaceDelegate = self
         updateImage()
@@ -58,6 +59,13 @@ final class StatusItemController: NSObject {
         for name in [UserDefaults.didChangeNotification, .NSCalendarDayChanged, .NSSystemTimeZoneDidChange] {
             NotificationCenter.default.addObserver(self, selector: #selector(scheduleRefresh), name: name, object: nil)
         }
+    }
+
+    /// Builds and draws the pop-up once while it is off screen, so the first click only has to show it.
+    private func warmUp() {
+        panel.setFrame(NSRect(x: 0, y: 0, width: PopUpContent.width, height: PopUpContent.height), display: false)
+        panel.contentView?.layoutSubtreeIfNeeded()
+        panel.display()
     }
 
     @objc nonisolated private func scheduleRefresh() {
