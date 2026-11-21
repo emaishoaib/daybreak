@@ -15,7 +15,7 @@ final class GlobeRenderer {
     static let shared = GlobeRenderer()
     static let radiusFraction = 0.9
 
-    private struct Request: Equatable {
+    struct Request: Equatable {
         let width: Int
         let height: Int
         let orientation: GlobeOrientation
@@ -23,10 +23,13 @@ final class GlobeRenderer {
         let sun: Coordinate
     }
 
-    private var resources: GlobeResources?
+    private(set) var image: CGImage?
+    @ObservationIgnored private var resources: GlobeResources?
     @ObservationIgnored private var loading: Task<Void, Never>?
     @ObservationIgnored private var target: MTLTexture?
-    @ObservationIgnored private var last: (request: Request, image: CGImage)?
+    @ObservationIgnored private var wanted: Request?
+    @ObservationIgnored private var drawing: Request?
+    @ObservationIgnored private var shown: Request?
 
     static func radius(for size: CGSize, zoom: Double) -> Double {
         min(size.width, size.height) / 2 * radiusFraction * zoom
@@ -36,16 +39,13 @@ final class GlobeRenderer {
         guard resources == nil, loading == nil else { return }
         loading = Task {
             resources = await Self.loadResources()
+            drawNext()
         }
     }
 
-    func image(width: Int, height: Int, orientation: GlobeOrientation, zoom: Double, sun: Coordinate) -> CGImage? {
-        let request = Request(width: width, height: height, orientation: orientation, zoom: zoom, sun: sun)
-        if let last, last.request == request { return last.image }
-        guard let resources else { prepare(); return nil }
-        guard width > 0, height > 0, let image = render(request, with: resources) else { return nil }
-        last = (request, image)
-        return image
+    func draw(_ request: Request) {
+        wanted = request
+        drawNext()
     }
 
     @concurrent
@@ -53,7 +53,27 @@ final class GlobeRenderer {
         MTLCreateSystemDefaultDevice().flatMap { try? GlobeResources(device: $0) }
     }
 
-    private func render(_ request: Request, with resources: GlobeResources) -> CGImage? {
+    private func drawNext() {
+        guard drawing == nil, let wanted, wanted != shown else { return }
+        guard let resources else { return prepare() }
+        guard wanted.width > 0, wanted.height > 0, let commands = encode(wanted, with: resources) else { return }
+        drawing = wanted
+        commands.addCompletedHandler { _ in
+            Task { @MainActor in self.finishDrawing() }
+        }
+        commands.commit()
+    }
+
+    private func finishDrawing() {
+        if let target {
+            image = Self.image(from: target)
+        }
+        shown = drawing
+        drawing = nil
+        drawNext()
+    }
+
+    private func encode(_ request: Request, with resources: GlobeResources) -> MTLCommandBuffer? {
         guard let target = target(width: request.width, height: request.height, device: resources.queue.device),
               let commands = resources.queue.makeCommandBuffer() else { return nil }
         let pass = MTLRenderPassDescriptor()
@@ -70,9 +90,7 @@ final class GlobeRenderer {
         encoder.setFragmentTexture(resources.night, index: 1)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         encoder.endEncoding()
-        commands.commit()
-        commands.waitUntilCompleted()
-        return Self.image(from: target)
+        return commands
     }
 
     private func target(width: Int, height: Int, device: MTLDevice) -> MTLTexture? {
