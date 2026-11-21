@@ -1,5 +1,6 @@
 import CoreGraphics
 import MetalKit
+import Observation
 import WorldTimeKit
 
 struct GlobeUniforms {
@@ -9,6 +10,7 @@ struct GlobeUniforms {
 }
 
 @MainActor
+@Observable
 final class GlobeRenderer {
     static let shared = GlobeRenderer()
     static let radiusFraction = 0.9
@@ -21,20 +23,34 @@ final class GlobeRenderer {
         let sun: Coordinate
     }
 
-    private let resources = MTLCreateSystemDefaultDevice().flatMap { try? GlobeResources(device: $0) }
-    private var target: MTLTexture?
-    private var last: (request: Request, image: CGImage)?
+    private var resources: GlobeResources?
+    @ObservationIgnored private var loading: Task<Void, Never>?
+    @ObservationIgnored private var target: MTLTexture?
+    @ObservationIgnored private var last: (request: Request, image: CGImage)?
 
     static func radius(for size: CGSize, zoom: Double) -> Double {
         min(size.width, size.height) / 2 * radiusFraction * zoom
     }
 
+    func prepare() {
+        guard resources == nil, loading == nil else { return }
+        loading = Task {
+            resources = await Self.loadResources()
+        }
+    }
+
     func image(width: Int, height: Int, orientation: GlobeOrientation, zoom: Double, sun: Coordinate) -> CGImage? {
         let request = Request(width: width, height: height, orientation: orientation, zoom: zoom, sun: sun)
         if let last, last.request == request { return last.image }
-        guard width > 0, height > 0, let resources, let image = render(request, with: resources) else { return nil }
+        guard let resources else { prepare(); return nil }
+        guard width > 0, height > 0, let image = render(request, with: resources) else { return nil }
         last = (request, image)
         return image
+    }
+
+    @concurrent
+    private nonisolated static func loadResources() async -> sending GlobeResources? {
+        MTLCreateSystemDefaultDevice().flatMap { try? GlobeResources(device: $0) }
     }
 
     private func render(_ request: Request, with resources: GlobeResources) -> CGImage? {

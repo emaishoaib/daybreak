@@ -17,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        GlobeRenderer.shared.prepare()
         statusItem = StatusItemController()
         AppUpdater.shared.start()
     }
